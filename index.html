@@ -14,31 +14,34 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; }
 
+    /* ── Header ── */
     header {
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-      color: #fff;
-      padding: 28px 40px;
-      display: flex; align-items: center; justify-content: space-between;
+      color: #fff; padding: 28px 40px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
     }
     header .header-text h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
     header .header-text p  { margin-top: 6px; opacity: .7; font-size: .95rem; }
-    #logout-btn {
+    .header-actions { display: flex; gap: 10px; flex-shrink: 0; }
+    .header-btn {
       background: rgba(255,255,255,0.15); color: #fff;
       border: 1.5px solid rgba(255,255,255,0.4);
       border-radius: 8px; padding: 8px 18px;
       font-size: .875rem; font-weight: 600; cursor: pointer;
-      transition: background .2s;
-      white-space: nowrap;
+      transition: background .2s; white-space: nowrap;
+      display: flex; align-items: center; gap: 6px;
     }
-    #logout-btn:hover { background: rgba(255,255,255,0.25); }
+    .header-btn:hover { background: rgba(255,255,255,0.25); }
+    .filter-badge {
+      background: #e74c3c; color: #fff; border-radius: 50%;
+      width: 18px; height: 18px; font-size: .7rem; font-weight: 700;
+      display: none; align-items: center; justify-content: center;
+    }
 
-    .kpi-row {
-      display: flex; gap: 16px; padding: 24px 40px 0;
-      flex-wrap: wrap;
-    }
+    /* ── KPI Row ── */
+    .kpi-row { display: flex; gap: 16px; padding: 24px 40px 0; flex-wrap: wrap; }
     .kpi {
-      flex: 1; min-width: 150px;
-      background: #fff; border-radius: 12px;
+      flex: 1; min-width: 150px; background: #fff; border-radius: 12px;
       padding: 20px 24px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
     }
     .kpi .label { font-size: .75rem; text-transform: uppercase; letter-spacing: .08em; color: #888; }
@@ -50,6 +53,7 @@
     .kpi.red    .value { color: #e74c3c; }
     .kpi.purple .value { color: #8e44ad; }
 
+    /* ── Charts ── */
     .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 24px 40px; }
     .chart-card {
       background: #fff; border-radius: 12px;
@@ -59,11 +63,11 @@
     .chart-card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: #333; }
     .chart-card canvas { max-height: 300px; }
 
+    /* ── Table ── */
     .table-card {
       background: #fff; border-radius: 12px;
       padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
-      margin: 0 40px 40px;
-      overflow-x: auto;
+      margin: 0 40px 40px; overflow-x: auto;
     }
     .table-card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: #333; }
     table { width: 100%; border-collapse: collapse; font-size: .9rem; }
@@ -71,345 +75,523 @@
     td { padding: 10px 14px; border-bottom: 1px solid #f0f2f5; }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #fafbfc; }
-    .badge {
-      display: inline-block; padding: 2px 10px; border-radius: 20px;
-      font-size: .78rem; font-weight: 600;
-    }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .78rem; font-weight: 600; }
     .badge-done     { background: #d4edda; color: #155724; }
     .badge-progress { background: #cce5ff; color: #004085; }
     .badge-todo     { background: #fff3cd; color: #856404; }
-    .badge-org  { background: #e8f4fd; color: #0f3460; }
-    .badge-gms  { background: #fef9e7; color: #7d6608; }
-
+    .badge-org      { background: #e8f4fd; color: #0f3460; }
+    .badge-gms      { background: #fef9e7; color: #7d6608; }
     .note { font-size: .78rem; color: #aaa; margin-top: 8px; }
 
+    /* ── Filter Panel ── */
+    #filter-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.35); z-index: 100;
+    }
+    #filter-overlay.open { display: block; }
+
+    #filter-panel {
+      position: fixed; top: 0; right: 0; height: 100vh; width: 300px;
+      background: #fff; z-index: 101;
+      transform: translateX(100%); transition: transform .3s ease;
+      display: flex; flex-direction: column;
+      box-shadow: -4px 0 24px rgba(0,0,0,.15);
+    }
+    #filter-panel.open { transform: translateX(0); }
+
+    .fp-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid #e9ecef;
+      background: linear-gradient(135deg, #1a1a2e, #0f3460);
+      color: #fff;
+    }
+    .fp-header h3 { font-size: 1rem; font-weight: 700; }
+    .fp-close {
+      background: rgba(255,255,255,.15); border: none; color: #fff;
+      width: 28px; height: 28px; border-radius: 6px;
+      font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    }
+    .fp-close:hover { background: rgba(255,255,255,.3); }
+
+    .fp-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+
+    .fp-section { margin-bottom: 20px; }
+    .fp-section-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .fp-section-title { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #555; }
+    .fp-toggle-all {
+      font-size: .75rem; color: #0f3460; background: none; border: none;
+      cursor: pointer; font-weight: 600; padding: 2px 6px;
+      border-radius: 4px; transition: background .15s;
+    }
+    .fp-toggle-all:hover { background: #e8f4fd; }
+
+    .fp-options { display: flex; flex-direction: column; gap: 8px; }
+    .fp-options label {
+      display: flex; align-items: center; gap: 10px;
+      font-size: .875rem; color: #333; cursor: pointer;
+      padding: 6px 10px; border-radius: 6px; transition: background .15s;
+    }
+    .fp-options label:hover { background: #f8f9fa; }
+    .fp-options input[type="checkbox"] {
+      width: 16px; height: 16px; cursor: pointer; accent-color: #0f3460; flex-shrink: 0;
+    }
+
+    .fp-divider { border: none; border-top: 1px solid #e9ecef; margin: 4px 0 16px; }
+
+    .fp-footer { padding: 16px 20px; border-top: 1px solid #e9ecef; }
+    .fp-reset {
+      width: 100%; padding: 10px; background: #f8f9fa; color: #555;
+      border: 1.5px solid #ddd; border-radius: 8px;
+      font-size: .875rem; font-weight: 600; cursor: pointer; transition: all .2s;
+    }
+    .fp-reset:hover { background: #e9ecef; border-color: #aaa; }
+
+    /* ── Responsive ── */
     @media (max-width: 768px) {
       .charts { grid-template-columns: 1fr; padding: 16px; }
       .kpi-row { padding: 16px; }
       .table-card { margin: 0 16px 24px; }
       header { padding: 20px 16px; }
+      #filter-panel { width: 100%; }
     }
   </style>
 </head>
 <body>
 
+<!-- Filter backdrop -->
+<div id="filter-overlay" onclick="closeFilter()"></div>
+
+<!-- Filter panel -->
+<div id="filter-panel">
+  <div class="fp-header">
+    <h3>Filter Settings</h3>
+    <button class="fp-close" onclick="closeFilter()">✕</button>
+  </div>
+  <div class="fp-body">
+
+    <div class="fp-section">
+      <div class="fp-section-head">
+        <span class="fp-section-title">Years</span>
+        <button class="fp-toggle-all" onclick="toggleAll('years')">All / None</button>
+      </div>
+      <div class="fp-options">
+        <label><input type="checkbox" name="years" value="2022" onchange="onFilterChange()"> 2022</label>
+        <label><input type="checkbox" name="years" value="2023" onchange="onFilterChange()"> 2023</label>
+        <label><input type="checkbox" name="years" value="2024" onchange="onFilterChange()"> 2024</label>
+        <label><input type="checkbox" name="years" value="2025" onchange="onFilterChange()"> 2025</label>
+        <label><input type="checkbox" name="years" value="2026*" onchange="onFilterChange()"> 2026 (YTD)</label>
+      </div>
+    </div>
+    <hr class="fp-divider"/>
+
+    <div class="fp-section">
+      <div class="fp-section-head">
+        <span class="fp-section-title">Projects</span>
+        <button class="fp-toggle-all" onclick="toggleAll('projects')">All / None</button>
+      </div>
+      <div class="fp-options">
+        <label><input type="checkbox" name="projects" value="org" onchange="onFilterChange()"> Origin (ORG)</label>
+        <label><input type="checkbox" name="projects" value="gms" onchange="onFilterChange()"> Orbit (GMS)</label>
+      </div>
+    </div>
+    <hr class="fp-divider"/>
+
+    <div class="fp-section">
+      <div class="fp-section-head">
+        <span class="fp-section-title">Ticket Status</span>
+        <button class="fp-toggle-all" onclick="toggleAll('statuses')">All / None</button>
+      </div>
+      <div class="fp-options">
+        <label><input type="checkbox" name="statuses" value="done"       onchange="onFilterChange()"> Done</label>
+        <label><input type="checkbox" name="statuses" value="inProgress" onchange="onFilterChange()"> In Progress</label>
+        <label><input type="checkbox" name="statuses" value="todo"       onchange="onFilterChange()"> Open / To Do</label>
+      </div>
+    </div>
+    <hr class="fp-divider"/>
+
+    <div class="fp-section">
+      <div class="fp-section-head">
+        <span class="fp-section-title">Priority</span>
+        <button class="fp-toggle-all" onclick="toggleAll('priorities')">All / None</button>
+      </div>
+      <div class="fp-options">
+        <label><input type="checkbox" name="priorities" value="highest" onchange="onFilterChange()"> Highest</label>
+        <label><input type="checkbox" name="priorities" value="high"    onchange="onFilterChange()"> High</label>
+        <label><input type="checkbox" name="priorities" value="medium"  onchange="onFilterChange()"> Medium</label>
+        <label><input type="checkbox" name="priorities" value="low"     onchange="onFilterChange()"> Low</label>
+      </div>
+    </div>
+
+  </div>
+  <div class="fp-footer">
+    <button class="fp-reset" onclick="resetFilters()">Reset to Default</button>
+  </div>
+</div>
+
+<!-- Header -->
 <header>
   <div class="header-text">
     <h1>PROD Bug Dashboard</h1>
-    <p>Origin (ORG) &amp; Orbit (GMS) &nbsp;·&nbsp; Application Environment = prod &nbsp;·&nbsp; All years · Last updated 5 May 2026</p>
+    <p>Origin (ORG) &amp; Orbit (GMS) &nbsp;·&nbsp; Application Environment = prod &nbsp;·&nbsp; Last updated 5 May 2026</p>
   </div>
-  <button id="logout-btn" onclick="doLogout()">Sign Out</button>
+  <div class="header-actions">
+    <button class="header-btn" onclick="openFilter()">
+      ⚙ Filters
+      <span class="filter-badge" id="filter-badge">0</span>
+    </button>
+    <button class="header-btn" onclick="doLogout()">Sign Out</button>
+  </div>
 </header>
 
 <!-- KPI Row -->
 <div class="kpi-row">
   <div class="kpi blue">
     <div class="label">Total PROD Bugs</div>
-    <div class="value">653</div>
-    <div class="sub">2022 – 2026 (YTD)</div>
+    <div class="value" id="kpi-total">—</div>
+    <div class="sub"   id="kpi-total-sub">—</div>
   </div>
   <div class="kpi green">
     <div class="label">Origin (ORG)</div>
-    <div class="value">302</div>
-    <div class="sub">46% of total</div>
+    <div class="value" id="kpi-org">—</div>
+    <div class="sub"   id="kpi-org-sub">—</div>
   </div>
   <div class="kpi orange">
     <div class="label">Orbit (GMS)</div>
-    <div class="value">351</div>
-    <div class="sub">54% of total</div>
+    <div class="value" id="kpi-gms">—</div>
+    <div class="sub"   id="kpi-gms-sub">—</div>
   </div>
   <div class="kpi red">
     <div class="label">Highest Priority</div>
-    <div class="value">211</div>
-    <div class="sub">32% of total</div>
+    <div class="value" id="kpi-highest">—</div>
+    <div class="sub"   id="kpi-highest-sub">—</div>
   </div>
   <div class="kpi purple">
     <div class="label">Open / In Progress</div>
-    <div class="value">57</div>
-    <div class="sub">As of today</div>
+    <div class="value" id="kpi-open">—</div>
+    <div class="sub"   id="kpi-open-sub">As of today</div>
   </div>
 </div>
 
-<!-- Charts Grid -->
+<!-- Charts -->
 <div class="charts">
-
   <div class="chart-card full">
     <h2>Total PROD Bugs per Year — Origin vs Orbit</h2>
     <canvas id="chartYearProject"></canvas>
   </div>
-
   <div class="chart-card">
     <h2>Priority Breakdown per Year</h2>
     <canvas id="chartPriority"></canvas>
   </div>
-
   <div class="chart-card">
     <h2>Resolution Status per Year</h2>
     <canvas id="chartStatus"></canvas>
   </div>
-
   <div class="chart-card full">
     <h2>Year-over-Year Trend — Total PROD Bugs Created</h2>
     <canvas id="chartTrend"></canvas>
-    <p class="note">* 2026 is a partial year (Jan–May). Annualised estimate ≈ 270 based on current pace.</p>
+    <p class="note" id="trend-note"></p>
   </div>
-
 </div>
 
-<!-- Detail Table -->
+<!-- Table -->
 <div class="table-card">
   <h2>Yearly Summary Table</h2>
   <table>
     <thead>
       <tr>
         <th>Year</th>
-        <th>ORG Bugs</th>
-        <th>GMS Bugs</th>
+        <th class="col-org">ORG Bugs</th>
+        <th class="col-gms">GMS Bugs</th>
         <th>Total</th>
-        <th>Highest</th>
-        <th>High</th>
-        <th>Medium</th>
-        <th>Low</th>
-        <th>Done</th>
-        <th>In Progress</th>
-        <th>Open / To Do</th>
+        <th class="col-highest">Highest</th>
+        <th class="col-high">High</th>
+        <th class="col-medium">Medium</th>
+        <th class="col-low">Low</th>
+        <th class="col-done">Done</th>
+        <th class="col-inprogress">In Progress</th>
+        <th class="col-todo">Open / To Do</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td><strong>2022</strong></td>
-        <td><span class="badge badge-org">0</span></td>
-        <td><span class="badge badge-gms">1</span></td>
-        <td><strong>1</strong></td>
-        <td>0</td><td>0</td><td>1</td><td>0</td>
-        <td><span class="badge badge-done">1</span></td>
-        <td>0</td><td>0</td>
-      </tr>
-      <tr>
-        <td><strong>2023</strong></td>
-        <td><span class="badge badge-org">11</span></td>
-        <td><span class="badge badge-gms">32</span></td>
-        <td><strong>43</strong></td>
-        <td>13</td><td>7</td><td>23</td><td>0</td>
-        <td><span class="badge badge-done">41</span></td>
-        <td>0</td>
-        <td><span class="badge badge-todo">2</span></td>
-      </tr>
-      <tr>
-        <td><strong>2024</strong></td>
-        <td><span class="badge badge-org">134</span></td>
-        <td><span class="badge badge-gms">165</span></td>
-        <td><strong>299</strong></td>
-        <td>103</td><td>53</td><td>140</td><td>3</td>
-        <td><span class="badge badge-done">278</span></td>
-        <td><span class="badge badge-progress">2</span></td>
-        <td><span class="badge badge-todo">19</span></td>
-      </tr>
-      <tr>
-        <td><strong>2025</strong></td>
-        <td><span class="badge badge-org">106</span></td>
-        <td><span class="badge badge-gms">92</span></td>
-        <td><strong>198</strong></td>
-        <td>53</td><td>32</td><td>110</td><td>3</td>
-        <td><span class="badge badge-done">177</span></td>
-        <td><span class="badge badge-progress">5</span></td>
-        <td><span class="badge badge-todo">16</span></td>
-      </tr>
-      <tr>
-        <td><strong>2026 *</strong></td>
-        <td><span class="badge badge-org">51</span></td>
-        <td><span class="badge badge-gms">61</span></td>
-        <td><strong>112</strong></td>
-        <td>42</td><td>27</td><td>43</td><td>0</td>
-        <td><span class="badge badge-done">77</span></td>
-        <td><span class="badge badge-progress">5</span></td>
-        <td><span class="badge badge-todo">30</span></td>
-      </tr>
-      <tr style="background:#f8f9fa;font-weight:600;">
-        <td><strong>TOTAL</strong></td>
-        <td>302</td><td>351</td><td><strong>653</strong></td>
-        <td>211</td><td>119</td><td>317</td><td>6</td>
-        <td>574</td><td>12</td><td>67</td>
-      </tr>
-    </tbody>
+    <tbody id="table-body"></tbody>
   </table>
   <p class="note">* 2026 is a partial year (data through 5 May 2026).</p>
 </div>
 
 <script>
+const DATA = [
+  { year: '2022',  org: 0,   gms: 1,   highest: 0,   high: 0,  medium: 1,   low: 0, done: 1,   inProgress: 0, todo: 0  },
+  { year: '2023',  org: 11,  gms: 32,  highest: 13,  high: 7,  medium: 23,  low: 0, done: 41,  inProgress: 0, todo: 2  },
+  { year: '2024',  org: 134, gms: 165, highest: 103, high: 53, medium: 140, low: 3, done: 278, inProgress: 2, todo: 19 },
+  { year: '2025',  org: 106, gms: 92,  highest: 53,  high: 32, medium: 110, low: 3, done: 177, inProgress: 5, todo: 16 },
+  { year: '2026*', org: 51,  gms: 61,  highest: 42,  high: 27, medium: 43,  low: 0, done: 77,  inProgress: 5, todo: 30 },
+];
+
+const DEFAULT_FILTERS = {
+  years:      ['2022', '2023', '2024', '2025', '2026*'],
+  projects:   ['org', 'gms'],
+  statuses:   ['done', 'inProgress', 'todo'],
+  priorities: ['highest', 'high', 'medium', 'low']
+};
+
+let chartInstances = {};
+
+// ── Filter state ──────────────────────────────────────────────────
+function getFilters() {
+  try {
+    const s = localStorage.getItem('dashboardFilters');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_FILTERS));
+}
+
+function readCheckboxFilters() {
+  const get = name => [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(c => c.value);
+  return {
+    years:      get('years'),
+    projects:   get('projects'),
+    statuses:   get('statuses'),
+    priorities: get('priorities')
+  };
+}
+
+function syncCheckboxes(f) {
+  ['years', 'projects', 'statuses', 'priorities'].forEach(name => {
+    document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
+      cb.checked = f[name].includes(cb.value);
+    });
+  });
+  updateBadge(f);
+}
+
+function updateBadge(f) {
+  const removed = Object.keys(DEFAULT_FILTERS).reduce((n, k) =>
+    n + DEFAULT_FILTERS[k].filter(v => !f[k].includes(v)).length, 0);
+  const badge = document.getElementById('filter-badge');
+  badge.textContent = removed;
+  badge.style.display = removed > 0 ? 'inline-flex' : 'none';
+}
+
+// ── Filter panel ──────────────────────────────────────────────────
+function openFilter()  {
+  document.getElementById('filter-panel').classList.add('open');
+  document.getElementById('filter-overlay').classList.add('open');
+}
+function closeFilter() {
+  document.getElementById('filter-panel').classList.remove('open');
+  document.getElementById('filter-overlay').classList.remove('open');
+}
+
+function toggleAll(name) {
+  const cbs = [...document.querySelectorAll(`input[name="${name}"]`)];
+  const anyUnchecked = cbs.some(c => !c.checked);
+  cbs.forEach(c => c.checked = anyUnchecked);
+  onFilterChange();
+}
+
+function resetFilters() {
+  syncCheckboxes(JSON.parse(JSON.stringify(DEFAULT_FILTERS)));
+  onFilterChange();
+}
+
+function onFilterChange() {
+  const f = readCheckboxFilters();
+  localStorage.setItem('dashboardFilters', JSON.stringify(f));
+  updateBadge(f);
+  const rows = DATA.filter(r => f.years.includes(r.year));
+  updateKPIs(rows, f);
+  renderCharts(rows, f);
+  renderTable(rows, f);
+}
+
+// ── KPIs ──────────────────────────────────────────────────────────
+function updateKPIs(rows, f) {
+  const pct = (n, d) => d > 0 ? Math.round(n / d * 100) + '% of total' : '—';
+  const sum = key => rows.reduce((s, r) => s + r[key], 0);
+
+  const orgTotal = f.projects.includes('org') ? sum('org') : 0;
+  const gmsTotal = f.projects.includes('gms') ? sum('gms') : 0;
+  const total    = orgTotal + gmsTotal;
+
+  const yearRange = rows.length === 0 ? 'No data'
+    : rows.length === 1 ? rows[0].year
+    : rows[0].year + ' – ' + rows[rows.length - 1].year;
+
+  document.getElementById('kpi-total').textContent     = total;
+  document.getElementById('kpi-total-sub').textContent = yearRange;
+
+  document.getElementById('kpi-org').textContent     = f.projects.includes('org') ? orgTotal : '—';
+  document.getElementById('kpi-org-sub').textContent = f.projects.includes('org') ? pct(orgTotal, total) : 'Filtered out';
+
+  document.getElementById('kpi-gms').textContent     = f.projects.includes('gms') ? gmsTotal : '—';
+  document.getElementById('kpi-gms-sub').textContent = f.projects.includes('gms') ? pct(gmsTotal, total) : 'Filtered out';
+
+  document.getElementById('kpi-highest').textContent     = sum('highest');
+  document.getElementById('kpi-highest-sub').textContent = pct(sum('highest'), total);
+
+  document.getElementById('kpi-open').textContent = sum('inProgress') + sum('todo');
+}
+
+// ── Charts ────────────────────────────────────────────────────────
+function renderCharts(rows, f) {
+  Object.values(chartInstances).forEach(c => { try { c.destroy(); } catch(e) {} });
+  chartInstances = {};
+
+  const labels = rows.map(r => r.year);
+  const empty  = [{ label: 'No data', data: labels.map(() => 0) }];
+
+  // Chart 1: ORG vs GMS grouped bar
+  const ds1 = [];
+  if (f.projects.includes('org')) ds1.push({ label: 'Origin (ORG)', data: rows.map(r => r.org),  backgroundColor: 'rgba(15,52,96,0.85)',  borderRadius: 6 });
+  if (f.projects.includes('gms')) ds1.push({ label: 'Orbit (GMS)',  data: rows.map(r => r.gms),  backgroundColor: 'rgba(230,126,34,0.85)', borderRadius: 6 });
+  chartInstances.c1 = new Chart(document.getElementById('chartYearProject'), {
+    type: 'bar',
+    data: { labels, datasets: ds1.length ? ds1 : empty },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: { callbacks: { footer: items => 'Total: ' + items.reduce((s, i) => s + i.parsed.y, 0) } }
+      },
+      scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f0f2f5' }, ticks: { stepSize: 50 } } }
+    }
+  });
+
+  // Chart 2: Priority stacked bar
+  const PRIOS = [
+    { key: 'highest', label: 'Highest', color: '#e74c3c' },
+    { key: 'high',    label: 'High',    color: '#e67e22' },
+    { key: 'medium',  label: 'Medium',  color: '#f39c12' },
+    { key: 'low',     label: 'Low',     color: '#27ae60' },
+  ];
+  const ds2 = PRIOS.filter(p => f.priorities.includes(p.key))
+    .map(p => ({ label: p.label, data: rows.map(r => r[p.key]), backgroundColor: p.color, borderRadius: 4 }));
+  chartInstances.c2 = new Chart(document.getElementById('chartPriority'), {
+    type: 'bar',
+    data: { labels, datasets: ds2.length ? ds2 : empty },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: '#f0f2f5' } } }
+    }
+  });
+
+  // Chart 3: Status stacked bar
+  const STATS = [
+    { key: 'done',       label: 'Done',         color: '#27ae60' },
+    { key: 'inProgress', label: 'In Progress',  color: '#2980b9' },
+    { key: 'todo',       label: 'Open / To Do', color: '#e67e22' },
+  ];
+  const ds3 = STATS.filter(s => f.statuses.includes(s.key))
+    .map(s => ({ label: s.label, data: rows.map(r => r[s.key]), backgroundColor: s.color, borderRadius: 4 }));
+  chartInstances.c3 = new Chart(document.getElementById('chartStatus'), {
+    type: 'bar',
+    data: { labels, datasets: ds3.length ? ds3 : empty },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: '#f0f2f5' } } }
+    }
+  });
+
+  // Chart 4: Trend line
+  const ds4 = [];
+  if (f.projects.includes('org') && f.projects.includes('gms')) {
+    ds4.push({ label: 'Total PROD Bugs', data: rows.map(r => r.org + r.gms), borderColor: '#0f3460', backgroundColor: 'rgba(15,52,96,0.08)', fill: true, tension: 0.35, pointRadius: 6, pointHoverRadius: 8, borderWidth: 2.5 });
+  }
+  if (f.projects.includes('org')) {
+    ds4.push({ label: 'Origin (ORG)', data: rows.map(r => r.org), borderColor: 'rgba(15,52,96,0.6)', backgroundColor: 'transparent', tension: 0.35, pointRadius: 4, borderDash: [5, 4], borderWidth: 1.8 });
+  }
+  if (f.projects.includes('gms')) {
+    ds4.push({ label: 'Orbit (GMS)', data: rows.map(r => r.gms), borderColor: 'rgba(230,126,34,0.7)', backgroundColor: 'transparent', tension: 0.35, pointRadius: 4, borderDash: [5, 4], borderWidth: 1.8 });
+  }
+  chartInstances.c4 = new Chart(document.getElementById('chartTrend'), {
+    type: 'line',
+    data: { labels, datasets: ds4.length ? ds4 : empty },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'top' } },
+      scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { color: '#f0f2f5' }, ticks: { stepSize: 50 } } }
+    }
+  });
+
+  const hasPartial = f.years.includes('2026*');
+  document.getElementById('trend-note').textContent = hasPartial
+    ? '* 2026 is a partial year (Jan–May). Annualised estimate ≈ 270 based on current pace.' : '';
+}
+
+// ── Table ─────────────────────────────────────────────────────────
+function renderTable(rows, f) {
+  const show = (sel, visible) =>
+    document.querySelectorAll(sel).forEach(el => el.style.display = visible ? '' : 'none');
+
+  show('.col-org',        f.projects.includes('org'));
+  show('.col-gms',        f.projects.includes('gms'));
+  show('.col-highest',    f.priorities.includes('highest'));
+  show('.col-high',       f.priorities.includes('high'));
+  show('.col-medium',     f.priorities.includes('medium'));
+  show('.col-low',        f.priorities.includes('low'));
+  show('.col-done',       f.statuses.includes('done'));
+  show('.col-inprogress', f.statuses.includes('inProgress'));
+  show('.col-todo',       f.statuses.includes('todo'));
+
+  const b = (v, cls) => `<span class="badge ${cls}">${v}</span>`;
+  const showOrg = f.projects.includes('org');
+  const showGms = f.projects.includes('gms');
+
+  let html = rows.map(r => {
+    const total = (showOrg ? r.org : 0) + (showGms ? r.gms : 0);
+    return `<tr>
+      <td><strong>${r.year}</strong></td>
+      <td class="col-org">${b(r.org, 'badge-org')}</td>
+      <td class="col-gms">${b(r.gms, 'badge-gms')}</td>
+      <td><strong>${total}</strong></td>
+      <td class="col-highest">${r.highest}</td>
+      <td class="col-high">${r.high}</td>
+      <td class="col-medium">${r.medium}</td>
+      <td class="col-low">${r.low}</td>
+      <td class="col-done">${b(r.done, 'badge-done')}</td>
+      <td class="col-inprogress">${b(r.inProgress, 'badge-progress')}</td>
+      <td class="col-todo">${b(r.todo, 'badge-todo')}</td>
+    </tr>`;
+  }).join('');
+
+  const sum = key => rows.reduce((s, r) => s + r[key], 0);
+  const totOrg = showOrg ? sum('org') : 0;
+  const totGms = showGms ? sum('gms') : 0;
+  html += `<tr style="background:#f8f9fa;font-weight:600;">
+    <td><strong>TOTAL</strong></td>
+    <td class="col-org">${totOrg}</td>
+    <td class="col-gms">${totGms}</td>
+    <td><strong>${totOrg + totGms}</strong></td>
+    <td class="col-highest">${sum('highest')}</td>
+    <td class="col-high">${sum('high')}</td>
+    <td class="col-medium">${sum('medium')}</td>
+    <td class="col-low">${sum('low')}</td>
+    <td class="col-done">${sum('done')}</td>
+    <td class="col-inprogress">${sum('inProgress')}</td>
+    <td class="col-todo">${sum('todo')}</td>
+  </tr>`;
+
+  document.getElementById('table-body').innerHTML = html;
+}
+
+// ── Logout ────────────────────────────────────────────────────────
 function doLogout() {
   sessionStorage.removeItem('auth');
   window.location.replace('login.html');
 }
 
-const years = ['2022', '2023', '2024', '2025', '2026*'];
-
-// ── Chart 1: Grouped bar – ORG vs GMS per year ───────────────────
-new Chart(document.getElementById('chartYearProject'), {
-  type: 'bar',
-  data: {
-    labels: years,
-    datasets: [
-      {
-        label: 'Origin (ORG)',
-        data: [0, 11, 134, 106, 51],
-        backgroundColor: 'rgba(15,52,96,0.85)',
-        borderRadius: 6,
-      },
-      {
-        label: 'Orbit (GMS)',
-        data: [1, 32, 165, 92, 61],
-        backgroundColor: 'rgba(230,126,34,0.85)',
-        borderRadius: 6,
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins: {
-      legend: { position: 'top' },
-      tooltip: {
-        callbacks: {
-          footer: (items) => {
-            const total = items.reduce((s, i) => s + i.parsed.y, 0);
-            return `Total: ${total}`;
-          }
-        }
-      }
-    },
-    scales: {
-      x: { grid: { display: false } },
-      y: { beginAtZero: true, grid: { color: '#f0f2f5' }, ticks: { stepSize: 50 } }
-    }
-  }
-});
-
-// ── Chart 2: Stacked bar – Priority per year ─────────────────────
-new Chart(document.getElementById('chartPriority'), {
-  type: 'bar',
-  data: {
-    labels: years,
-    datasets: [
-      {
-        label: 'Highest',
-        data: [0, 13, 103, 53, 42],
-        backgroundColor: '#e74c3c',
-        borderRadius: 4,
-      },
-      {
-        label: 'High',
-        data: [0, 7, 53, 32, 27],
-        backgroundColor: '#e67e22',
-        borderRadius: 4,
-      },
-      {
-        label: 'Medium',
-        data: [1, 23, 140, 110, 43],
-        backgroundColor: '#f39c12',
-        borderRadius: 4,
-      },
-      {
-        label: 'Low',
-        data: [0, 0, 3, 3, 0],
-        backgroundColor: '#27ae60',
-        borderRadius: 4,
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { position: 'top' } },
-    scales: {
-      x: { stacked: true, grid: { display: false } },
-      y: { stacked: true, beginAtZero: true, grid: { color: '#f0f2f5' } }
-    }
-  }
-});
-
-// ── Chart 3: Stacked bar – Status per year ───────────────────────
-new Chart(document.getElementById('chartStatus'), {
-  type: 'bar',
-  data: {
-    labels: years,
-    datasets: [
-      {
-        label: 'Done',
-        data: [1, 41, 278, 177, 77],
-        backgroundColor: '#27ae60',
-        borderRadius: 4,
-      },
-      {
-        label: 'In Progress',
-        data: [0, 0, 2, 5, 5],
-        backgroundColor: '#2980b9',
-        borderRadius: 4,
-      },
-      {
-        label: 'Open / To Do',
-        data: [0, 2, 19, 16, 30],
-        backgroundColor: '#e67e22',
-        borderRadius: 4,
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { position: 'top' } },
-    scales: {
-      x: { stacked: true, grid: { display: false } },
-      y: { stacked: true, beginAtZero: true, grid: { color: '#f0f2f5' } }
-    }
-  }
-});
-
-// ── Chart 4: Line – YoY trend ────────────────────────────────────
-new Chart(document.getElementById('chartTrend'), {
-  type: 'line',
-  data: {
-    labels: ['2022', '2023', '2024', '2025', '2026 (est.)'],
-    datasets: [
-      {
-        label: 'Total PROD Bugs',
-        data: [1, 43, 299, 198, 270],
-        borderColor: '#0f3460',
-        backgroundColor: 'rgba(15,52,96,0.08)',
-        fill: true,
-        tension: 0.35,
-        pointRadius: 6,
-        pointHoverRadius: 8,
-        borderWidth: 2.5,
-      },
-      {
-        label: 'Origin (ORG)',
-        data: [0, 11, 134, 106, 122],
-        borderColor: 'rgba(15,52,96,0.6)',
-        backgroundColor: 'transparent',
-        tension: 0.35,
-        pointRadius: 4,
-        borderDash: [5, 4],
-        borderWidth: 1.8,
-      },
-      {
-        label: 'Orbit (GMS)',
-        data: [1, 32, 165, 92, 147],
-        borderColor: 'rgba(230,126,34,0.7)',
-        backgroundColor: 'transparent',
-        tension: 0.35,
-        pointRadius: 4,
-        borderDash: [5, 4],
-        borderWidth: 1.8,
-      }
-    ]
-  },
-  options: {
-    responsive: true,
-    plugins: { legend: { position: 'top' } },
-    scales: {
-      x: { grid: { display: false } },
-      y: { beginAtZero: true, grid: { color: '#f0f2f5' }, ticks: { stepSize: 50 } }
-    }
-  }
-});
+// ── Init ──────────────────────────────────────────────────────────
+const initFilters = getFilters();
+syncCheckboxes(initFilters);
+const initRows = DATA.filter(r => initFilters.years.includes(r.year));
+updateKPIs(initRows, initFilters);
+renderCharts(initRows, initFilters);
+renderTable(initRows, initFilters);
 </script>
 </body>
 </html>
