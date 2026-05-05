@@ -4,6 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PROD Bug Dashboard — Origin (ORG) & Orbit (GMS)</title>
+  <script>
+    if (sessionStorage.getItem('auth') !== 'true') {
+      window.location.replace('login.html');
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,9 +18,19 @@
       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       color: #fff;
       padding: 28px 40px;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
-    header p  { margin-top: 6px; opacity: .7; font-size: .95rem; }
+    header .header-text h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+    header .header-text p  { margin-top: 6px; opacity: .7; font-size: .95rem; }
+    #logout-btn {
+      background: rgba(255,255,255,0.15); color: #fff;
+      border: 1.5px solid rgba(255,255,255,0.4);
+      border-radius: 8px; padding: 8px 18px;
+      font-size: .875rem; font-weight: 600; cursor: pointer;
+      transition: background .2s;
+      white-space: nowrap;
+    }
+    #logout-btn:hover { background: rgba(255,255,255,0.25); }
 
     .kpi-row {
       display: flex; gap: 16px; padding: 24px 40px 0;
@@ -74,68 +89,16 @@
       .table-card { margin: 0 16px 24px; }
       header { padding: 20px 16px; }
     }
-  /* ── Login overlay ── */
-  #login-overlay {
-    position: fixed; inset: 0; z-index: 9999;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    display: flex; align-items: center; justify-content: center;
-  }
-  #login-box {
-    background: #fff; border-radius: 16px;
-    padding: 40px 48px; width: 100%; max-width: 400px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.4);
-  }
-  #login-box h2 {
-    font-size: 1.4rem; font-weight: 700; color: #0f3460;
-    margin-bottom: 6px;
-  }
-  #login-box p.sub {
-    font-size: .85rem; color: #888; margin-bottom: 28px;
-  }
-  #login-box label {
-    display: block; font-size: .8rem; font-weight: 600;
-    color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em;
-  }
-  #login-box input {
-    width: 100%; padding: 10px 14px; border: 1.5px solid #ddd;
-    border-radius: 8px; font-size: .95rem; margin-bottom: 18px;
-    transition: border-color .2s;
-  }
-  #login-box input:focus { outline: none; border-color: #0f3460; }
-  #login-btn {
-    width: 100%; padding: 12px; background: #0f3460; color: #fff;
-    border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
-    cursor: pointer; transition: background .2s;
-  }
-  #login-btn:hover { background: #16213e; }
-  #login-error {
-    color: #e74c3c; font-size: .85rem; margin-top: 12px;
-    text-align: center; display: none;
-  }
-  #dashboard { display: none; }
   </style>
 </head>
 <body>
 
-<!-- Login Overlay -->
-<div id="login-overlay">
-  <div id="login-box">
-    <h2>PROD Bug Dashboard</h2>
-    <p class="sub">Sign in to continue</p>
-    <label for="username">Username</label>
-    <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
-    <label for="password">Password</label>
-    <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
-    <button id="login-btn" onclick="doLogin()">Sign In</button>
-    <p id="login-error">Invalid username or password.</p>
-  </div>
-</div>
-
-<!-- Dashboard (hidden until login) -->
-<div id="dashboard">
 <header>
-  <h1>PROD Bug Dashboard</h1>
-  <p>Origin (ORG) &amp; Orbit (GMS) &nbsp;·&nbsp; Application Environment = prod &nbsp;·&nbsp; All years · Last updated 5 May 2026</p>
+  <div class="header-text">
+    <h1>PROD Bug Dashboard</h1>
+    <p>Origin (ORG) &amp; Orbit (GMS) &nbsp;·&nbsp; Application Environment = prod &nbsp;·&nbsp; All years · Last updated 5 May 2026</p>
+  </div>
+  <button id="logout-btn" onclick="doLogout()">Sign Out</button>
 </header>
 
 <!-- KPI Row -->
@@ -170,25 +133,21 @@
 <!-- Charts Grid -->
 <div class="charts">
 
-  <!-- Chart 1: Total bugs per year (ORG vs GMS) — full width -->
   <div class="chart-card full">
     <h2>Total PROD Bugs per Year — Origin vs Orbit</h2>
     <canvas id="chartYearProject"></canvas>
   </div>
 
-  <!-- Chart 2: Priority breakdown per year -->
   <div class="chart-card">
     <h2>Priority Breakdown per Year</h2>
     <canvas id="chartPriority"></canvas>
   </div>
 
-  <!-- Chart 3: Status breakdown per year -->
   <div class="chart-card">
     <h2>Resolution Status per Year</h2>
     <canvas id="chartStatus"></canvas>
   </div>
 
-  <!-- Chart 4: YoY trend line -->
   <div class="chart-card full">
     <h2>Year-over-Year Trend — Total PROD Bugs Created</h2>
     <canvas id="chartTrend"></canvas>
@@ -277,22 +236,11 @@
   <p class="note">* 2026 is a partial year (data through 5 May 2026).</p>
 </div>
 
-</div><!-- /dashboard -->
-
 <script>
-function doLogin() {
-  const u = document.getElementById('username').value;
-  const p = document.getElementById('password').value;
-  if (u === 'administrator' && p === '$t@nIS14am,LovtiN15') {
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-  } else {
-    document.getElementById('login-error').style.display = 'block';
-  }
+function doLogout() {
+  sessionStorage.removeItem('auth');
+  window.location.replace('login.html');
 }
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') doLogin();
-});
 
 const years = ['2022', '2023', '2024', '2025', '2026*'];
 

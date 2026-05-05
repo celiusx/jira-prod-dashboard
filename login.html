@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — PROD Bug Dashboard</title>
+  <script>
+    if (sessionStorage.getItem('auth') === 'true') {
+      window.location.replace('index.html');
+    }
+  </script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .login-box {
+      background: #fff; border-radius: 16px;
+      padding: 40px 48px; width: 100%; max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    }
+    .login-box h2 {
+      font-size: 1.4rem; font-weight: 700; color: #0f3460; margin-bottom: 6px;
+    }
+    .login-box p.sub {
+      font-size: .85rem; color: #888; margin-bottom: 28px;
+    }
+    label {
+      display: block; font-size: .8rem; font-weight: 600;
+      color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em;
+    }
+    input {
+      width: 100%; padding: 10px 14px; border: 1.5px solid #ddd;
+      border-radius: 8px; font-size: .95rem; margin-bottom: 18px;
+      transition: border-color .2s;
+    }
+    input:focus { outline: none; border-color: #0f3460; }
+    button {
+      width: 100%; padding: 12px; background: #0f3460; color: #fff;
+      border: none; border-radius: 8px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: background .2s;
+    }
+    button:hover { background: #16213e; }
+    .error {
+      color: #e74c3c; font-size: .85rem; margin-top: 12px;
+      text-align: center; display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <h2>PROD Bug Dashboard</h2>
+    <p class="sub">Sign in to continue</p>
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
+    <button onclick="doLogin()">Sign In</button>
+    <p class="error" id="error-msg">Invalid username or password.</p>
+  </div>
+  <script>
+    function doLogin() {
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      if (u === 'administrator' && p === '$t@nIS14am,LovtiN15') {
+        sessionStorage.setItem('auth', 'true');
+        window.location.replace('index.html');
+      } else {
+        document.getElementById('error-msg').style.display = 'block';
+      }
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+  </script>
+</body>
+</html>
