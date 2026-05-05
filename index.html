@@ -5,6 +5,76 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PROD Bug Dashboard — Origin (ORG) & Orbit (GMS)</title>
   <script>
+
+const MODULE_DATA = {
+  ORG: {
+    '2022':  [{'module':'Other','count':2},{'module':'Origin Web','count':1},{'module':'Origin Mobile','count':1}],
+    '2023':  [{'module':'Origin Web','count':27},{'module':'Origin Mobile','count':10},{'module':'Other','count':3}],
+    '2024':  [{'module':'Other','count':116},{'module':'Origin Web','count':111},{'module':'Origin Mobile','count':40},{'module':'Orbit Web','count':1}],
+    '2025':  [{'module':'Origin Web','count':131},{'module':'Origin Mobile','count':130},{'module':'Other','count':100},{'module':'Origin Server','count':1}],
+    '2026*': [{'module':'Origin Web','count':51},{'module':'Other','count':39},{'module':'Origin Mobile','count':38}]
+  },
+  GMS: {
+    '2022':  [{'module':'Other','count':5},{'module':'Orbit Web','count':3},{'module':'Orbit Mobile','count':1}],
+    '2023':  [{'module':'Orbit Web','count':44},{'module':'Orbit Mobile','count':16},{'module':'Other','count':10}],
+    '2024':  [{'module':'Other','count':246},{'module':'Orbit Web','count':206},{'module':'Orbit Mobile','count':155},{'module':'Orbit','count':3},{'module':'Origin Web','count':1}],
+    '2025':  [{'module':'Orbit Mobile','count':133},{'module':'Orbit Web','count':123},{'module':'Other','count':119},{'module':'Orbit','count':29},{'module':'Origin Web','count':3}],
+    '2026*': [{'module':'Orbit Web','count':67},{'module':'Orbit Mobile','count':43},{'module':'Other','count':30},{'module':'Orbit','count':6},{'module':'Origin Web','count':1}]
+  }
+};
+
+const MODULE_COLORS = ['#0f3460','#e67e22','#16a085','#8e44ad','#e74c3c','#b0bec5'];
+let activeModuleYear = { ORG: '2025', GMS: '2025' };
+
+function buildModuleTabs(project, years) {
+  const el = document.getElementById((project === 'ORG' ? 'org' : 'gms') + '-tabs');
+  el.innerHTML = '';
+  years.forEach(function(yr) {
+    const btn = document.createElement('button');
+    btn.className = 'module-tab-btn' + (yr === activeModuleYear[project] ? ' active' : '');
+    btn.textContent = yr;
+    (function(y) { btn.onclick = function() { activeModuleYear[project] = y; renderModuleChart(project, years); }; })(yr);
+    el.appendChild(btn);
+  });
+}
+
+function renderModuleChart(project, years) {
+  buildModuleTabs(project, years);
+  const canvasId = project === 'ORG' ? 'chartModuleOrg' : 'chartModuleGms';
+  const key = project === 'ORG' ? 'c_modOrg' : 'c_modGms';
+  if (chartInstances[key]) { try { chartInstances[key].destroy(); } catch(e) {} }
+
+  const yr = activeModuleYear[project];
+  const rows = (MODULE_DATA[project][yr] || []).slice(0, 5);
+  chartInstances[key] = new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels: rows.map(function(r) { return r.module; }),
+      datasets: [{ label: 'Bugs', data: rows.map(function(r) { return r.count; }),
+        backgroundColor: rows.map(function(_, i) { return MODULE_COLORS[i] || '#b0bec5'; }), borderRadius: 6 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: function(ctx) { return ' ' + ctx.parsed.x + ' bugs'; } } } },
+      scales: {
+        x: { beginAtZero: true, grid: { color: '#f0f2f5' } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+function initModuleWidgets(filteredYears) {
+  const allYears = ['2022','2023','2024','2025','2026*'];
+  const years = allYears.filter(function(y) { return filteredYears.includes(y); });
+  const active = years.length ? years : allYears;
+  if (!active.includes(activeModuleYear.ORG)) activeModuleYear.ORG = active[active.length - 1];
+  if (!active.includes(activeModuleYear.GMS)) activeModuleYear.GMS = active[active.length - 1];
+  renderModuleChart('ORG', active);
+  renderModuleChart('GMS', active);
+}
+
     if (sessionStorage.getItem('auth') !== 'true') {
       window.location.replace('login.html');
     }
@@ -158,6 +228,17 @@
       header { padding: 20px 16px; }
       #filter-panel { width: 100%; }
     }
+
+    /* -- Module Breakdown Widget -- */
+    .module-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+    .module-tab-btn {
+      padding: 4px 12px; border-radius: 20px; border: 1.5px solid #ddd;
+      background: #f8f9fa; font-size: .8rem; font-weight: 600; cursor: pointer;
+      color: #555; transition: all .15s;
+    }
+    .module-tab-btn.active { background: #0f3460; color: #fff; border-color: #0f3460; }
+    .module-tab-btn:hover:not(.active) { background: #e8f4fd; border-color: #0f3460; color: #0f3460; }
+    .module-note { font-size: .75rem; color: #aaa; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -297,6 +378,23 @@
   </div>
 </div>
 
+
+<!-- Module Breakdown -->
+<div class="charts" id="module-section">
+  <div class="chart-card">
+    <h2>Top 5 Modules &mdash; Origin (ORG)</h2>
+    <div class="module-tabs" id="org-tabs"></div>
+    <canvas id="chartModuleOrg"></canvas>
+    <p class="module-note">Categorised by summary prefix across all environments.</p>
+  </div>
+  <div class="chart-card">
+    <h2>Top 5 Modules &mdash; Orbit (GMS)</h2>
+    <div class="module-tabs" id="gms-tabs"></div>
+    <canvas id="chartModuleGms"></canvas>
+    <p class="module-note">Categorised by summary prefix across all environments.</p>
+  </div>
+</div>
+
 <!-- Table -->
 <div class="table-card">
   <h2>Yearly Summary Table</h2>
@@ -405,6 +503,7 @@ function onFilterChange() {
   updateKPIs(rows, f);
   renderCharts(rows, f);
   renderTable(rows, f);
+  initModuleWidgets(f.years);
 }
 
 // ── KPIs ──────────────────────────────────────────────────────────
@@ -592,6 +691,7 @@ const initRows = DATA.filter(r => initFilters.years.includes(r.year));
 updateKPIs(initRows, initFilters);
 renderCharts(initRows, initFilters);
 renderTable(initRows, initFilters);
+initModuleWidgets(initFilters.years);
 </script>
 </body>
 </html>
