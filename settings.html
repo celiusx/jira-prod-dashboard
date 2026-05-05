@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — PROD Bug Dashboard</title>
+  <script>if(sessionStorage.getItem('auth')!=='true'){window.location.replace('login.html');}</script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh;}
+    header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#fff;padding:28px 40px;display:flex;align-items:center;justify-content:space-between;gap:16px;}
+    header h1{font-size:1.8rem;font-weight:700;letter-spacing:-.5px;}
+    header p{margin-top:6px;opacity:.7;font-size:.95rem;}
+    .header-actions{display:flex;gap:10px;flex-shrink:0;}
+    .header-btn{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.4);border-radius:8px;padding:8px 18px;font-size:.875rem;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap;}
+    .header-btn:hover{background:rgba(255,255,255,.25);}
+    .content{max-width:860px;margin:32px auto;padding:0 24px 48px;}
+    .card{background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:24px;}
+    .card h2{font-size:1rem;font-weight:700;color:#333;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #f0f2f5;}
+    .form-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+    .form-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:160px;}
+    label{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#555;}
+    input[type=text],input[type=password]{padding:9px 12px;border:1.5px solid #ddd;border-radius:8px;font-size:.9rem;transition:border-color .2s;width:100%;}
+    input:focus{outline:none;border-color:#0f3460;}
+    .btn{padding:9px 20px;border:none;border-radius:8px;font-size:.875rem;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap;}
+    .btn-primary{background:#0f3460;color:#fff;}
+    .btn-primary:hover{background:#16213e;}
+    .btn-danger{background:#e74c3c;color:#fff;}
+    .btn-danger:hover{background:#c0392b;}
+    .btn-secondary{background:#f0f2f5;color:#555;border:1.5px solid #ddd;}
+    .btn-secondary:hover{background:#e2e6ea;}
+    .msg{font-size:.85rem;margin-top:12px;padding:8px 12px;border-radius:6px;display:none;}
+    .msg.error{background:#fde8e8;color:#b71c1c;}
+    .msg.success{background:#d4edda;color:#155724;}
+    table{width:100%;border-collapse:collapse;font-size:.9rem;}
+    th{background:#f8f9fa;font-weight:600;padding:10px 14px;text-align:left;border-bottom:2px solid #e9ecef;}
+    td{padding:10px 14px;border-bottom:1px solid #f0f2f5;vertical-align:middle;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#fafbfc;}
+    .td-actions{display:flex;gap:8px;}
+    .you-badge{display:inline-block;background:#e8f4fd;color:#0f3460;font-size:.7rem;font-weight:700;padding:1px 8px;border-radius:20px;margin-left:6px;vertical-align:middle;}
+    .empty-row td{text-align:center;color:#aaa;padding:24px;}
+    /* Modal */
+    #modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center;}
+    #modal-overlay.open{display:flex;}
+    #modal{background:#fff;border-radius:14px;padding:32px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+    #modal h3{font-size:1.1rem;font-weight:700;color:#0f3460;margin-bottom:4px;}
+    #modal .modal-sub{font-size:.85rem;color:#888;margin-bottom:20px;}
+    .modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
+    @media(max-width:600px){.form-row{flex-direction:column;}.content{padding:0 12px 48px;}header{padding:20px 16px;}}
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Settings</h1>
+    <p>User Management</p>
+  </div>
+  <div class="header-actions">
+    <button class="header-btn" onclick="window.location.href='index.html'">&#8592; Dashboard</button>
+    <button class="header-btn" onclick="doLogout()">Sign Out</button>
+  </div>
+</header>
+
+<div class="content">
+
+  <!-- Add User -->
+  <div class="card">
+    <h2>Add New User</h2>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="new-user">Username</label>
+        <input type="text" id="new-user" placeholder="Enter username" autocomplete="off"/>
+      </div>
+      <div class="form-group">
+        <label for="new-pass">Password</label>
+        <input type="password" id="new-pass" placeholder="Enter password"/>
+      </div>
+      <div class="form-group">
+        <label for="new-pass2">Confirm Password</label>
+        <input type="password" id="new-pass2" placeholder="Confirm password"/>
+      </div>
+      <button class="btn btn-primary" onclick="addUser()" style="margin-bottom:0;align-self:flex-end;">Add User</button>
+    </div>
+    <div class="msg" id="add-msg"></div>
+  </div>
+
+  <!-- User List -->
+  <div class="card">
+    <h2>Current Users</h2>
+    <table>
+      <thead>
+        <tr><th>Username</th><th style="width:220px;">Actions</th></tr>
+      </thead>
+      <tbody id="user-tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Change Password Modal -->
+<div id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div id="modal">
+    <h3>Change Password</h3>
+    <p class="modal-sub" id="modal-sub">Set a new password for <strong id="modal-username"></strong></p>
+    <div class="form-group" style="margin-bottom:12px;">
+      <label for="modal-pass">New Password</label>
+      <input type="password" id="modal-pass" placeholder="New password"/>
+    </div>
+    <div class="form-group">
+      <label for="modal-pass2">Confirm Password</label>
+      <input type="password" id="modal-pass2" placeholder="Confirm password"/>
+    </div>
+    <div class="msg" id="modal-msg"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePassword()">Save Password</button>
+    </div>
+  </div>
+</div>
+
+<script>
+
+  async function _sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  function _getUsers() {
+    try { return JSON.parse(localStorage.getItem('dashboardUsers')) || []; } catch(e) { return []; }
+  }
+  function _saveUsers(u) { localStorage.setItem('dashboardUsers', JSON.stringify(u)); }
+  async function _ensureDefault() {
+    if (_getUsers().length === 0) {
+      _saveUsers([{username:'administrator', passwordHash: await _sha256('$t@nIS14am,LovtiN15')}]);
+    }
+  }
+
+  const currentUser = sessionStorage.getItem('currentUser') || '';
+
+  function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+  function showMsg(id, msg, type) {
+    const el = document.getElementById(id);
+    el.textContent = msg; el.className = 'msg ' + type; el.style.display = 'block';
+    if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 3000);
+  }
+
+  function renderUsers() {
+    const users = _getUsers();
+    const tbody = document.getElementById('user-tbody');
+    if (!users.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="2">No users found.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = users.map(function(u) {
+      const isMe = u.username === currentUser;
+      const canRemove = users.length > 1 && !isMe;
+      return '<tr>' +
+        '<td>' + escHtml(u.username) + (isMe ? '<span class="you-badge">You</span>' : '') + '</td>' +
+        '<td><div class="td-actions">' +
+          '<button class="btn btn-secondary" style="font-size:.8rem;padding:6px 12px;" onclick="openChangePassword(\'' + escHtml(u.username) + '\')">Change Password</button>' +
+          (canRemove ? '<button class="btn btn-danger" style="font-size:.8rem;padding:6px 12px;" onclick="removeUser(\'' + escHtml(u.username) + '\')">Remove</button>' : '') +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  async function addUser() {
+    const username = document.getElementById('new-user').value.trim();
+    const pass = document.getElementById('new-pass').value;
+    const pass2 = document.getElementById('new-pass2').value;
+    if (!username || !pass) { showMsg('add-msg', 'Username and password are required.', 'error'); return; }
+    if (pass !== pass2) { showMsg('add-msg', 'Passwords do not match.', 'error'); return; }
+    const users = _getUsers();
+    if (users.find(function(u){ return u.username === username; })) { showMsg('add-msg', 'Username already exists.', 'error'); return; }
+    users.push({username: username, passwordHash: await _sha256(pass)});
+    _saveUsers(users);
+    document.getElementById('new-user').value = '';
+    document.getElementById('new-pass').value = '';
+    document.getElementById('new-pass2').value = '';
+    renderUsers();
+    showMsg('add-msg', 'User "' + escHtml(username) + '" added successfully.', 'success');
+  }
+
+  function removeUser(username) {
+    if (!confirm('Remove user "' + username + '"? This cannot be undone.')) return;
+    _saveUsers(_getUsers().filter(function(u){ return u.username !== username; }));
+    renderUsers();
+  }
+
+  let _targetUser = null;
+  function openChangePassword(username) {
+    _targetUser = username;
+    document.getElementById('modal-username').textContent = username;
+    document.getElementById('modal-pass').value = '';
+    document.getElementById('modal-pass2').value = '';
+    document.getElementById('modal-msg').style.display = 'none';
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(function(){ document.getElementById('modal-pass').focus(); }, 100);
+  }
+
+  function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+  function handleOverlayClick(e) { if (e.target === document.getElementById('modal-overlay')) closeModal(); }
+
+  async function savePassword() {
+    const pass = document.getElementById('modal-pass').value;
+    const pass2 = document.getElementById('modal-pass2').value;
+    if (!pass) { showMsg('modal-msg', 'Password is required.', 'error'); return; }
+    if (pass !== pass2) { showMsg('modal-msg', 'Passwords do not match.', 'error'); return; }
+    const users = _getUsers();
+    const user = users.find(function(u){ return u.username === _targetUser; });
+    if (!user) return;
+    user.passwordHash = await _sha256(pass);
+    _saveUsers(users);
+    closeModal();
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('open')) savePassword();
+  });
+
+  function doLogout() {
+    sessionStorage.removeItem('auth');
+    sessionStorage.removeItem('currentUser');
+    window.location.replace('login.html');
+  }
+
+  _ensureDefault().then(renderUsers);
+</script>
+</body>
+</html>

@@ -414,6 +414,7 @@ function _renderList(tickets){
       ⚙ Filters
       <span class="filter-badge" id="filter-badge">0</span>
     </button>
+    <button class="header-btn" onclick="window.location.href='settings.html'">&#9881; Settings</button>
     <button class="header-btn" onclick="doLogout()">Sign Out</button>
   </div>
 </header>
@@ -771,6 +772,7 @@ function renderTable(rows, f) {
 // ── Logout ────────────────────────────────────────────────────────
 function doLogout() {
   sessionStorage.removeItem('auth');
+  sessionStorage.removeItem('currentUser');
   window.location.replace('login.html');
 }
 
