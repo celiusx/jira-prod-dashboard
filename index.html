@@ -8,18 +8,18 @@
 
 const MODULE_DATA = {
   ORG: {
-    '2022':  [{'module':'Other','count':2},{'module':'Origin Web','count':1},{'module':'Origin Mobile','count':1}],
-    '2023':  [{'module':'Origin Web','count':27},{'module':'Origin Mobile','count':10},{'module':'Other','count':3}],
-    '2024':  [{'module':'Other','count':116},{'module':'Origin Web','count':111},{'module':'Origin Mobile','count':40},{'module':'Orbit Web','count':1}],
-    '2025':  [{'module':'Origin Web','count':131},{'module':'Origin Mobile','count':130},{'module':'Other','count':100},{'module':'Origin Server','count':1}],
-    '2026*': [{'module':'Origin Web','count':51},{'module':'Other','count':39},{'module':'Origin Mobile','count':38}]
+    '2022':  [{'module':'Translations / UI','count':2},{'module':'Farmer / Profile','count':1},{'module':'Sync','count':1}],
+    '2023':  [{'module':'Other','count':15},{'module':'Farmer / Profile','count':9},{'module':'Mapping / Location','count':7},{'module':'Translations / UI','count':4},{'module':'Sync','count':3}],
+    '2024':  [{'module':'Other','count':111},{'module':'Mapping / Location','count':51},{'module':'Farmer / Profile','count':36},{'module':'Sync','count':26},{'module':'Bags / Bags Transfer','count':24}],
+    '2025':  [{'module':'Other','count':150},{'module':'Bags / Bags Transfer','count':88},{'module':'Farmer / Profile','count':55},{'module':'Mapping / Location','count':42},{'module':'Sync','count':31}],
+    '2026*': [{'module':'Other','count':51},{'module':'Bags / Bags Transfer','count':27},{'module':'Reports','count':15},{'module':'Mapping / Location','count':13},{'module':'Sync','count':11}]
   },
   GMS: {
-    '2022':  [{'module':'Other','count':5},{'module':'Orbit Web','count':3},{'module':'Orbit Mobile','count':1}],
-    '2023':  [{'module':'Orbit Web','count':44},{'module':'Orbit Mobile','count':16},{'module':'Other','count':10}],
-    '2024':  [{'module':'Other','count':246},{'module':'Orbit Web','count':206},{'module':'Orbit Mobile','count':155},{'module':'Orbit','count':3},{'module':'Origin Web','count':1}],
-    '2025':  [{'module':'Orbit Mobile','count':133},{'module':'Orbit Web','count':123},{'module':'Other','count':119},{'module':'Orbit','count':29},{'module':'Origin Web','count':3}],
-    '2026*': [{'module':'Orbit Web','count':67},{'module':'Orbit Mobile','count':43},{'module':'Other','count':30},{'module':'Orbit','count':6},{'module':'Origin Web','count':1}]
+    '2022':  [{'module':'Other','count':4},{'module':'Survey','count':2},{'module':'Mapping / Field','count':1},{'module':'Farmer / Grower','count':1},{'module':'Infrastructure','count':1}],
+    '2023':  [{'module':'Survey','count':22},{'module':'Other','count':21},{'module':'Mapping / Field','count':13},{'module':'Farmer / Grower','count':5},{'module':'Sync / Performance','count':5}],
+    '2024':  [{'module':'Other','count':234},{'module':'Survey','count':159},{'module':'Sync / Performance','count':80},{'module':'Mapping / Field','count':48},{'module':'Case Management','count':41}],
+    '2025':  [{'module':'Other','count':169},{'module':'Survey','count':89},{'module':'Case Management','count':66},{'module':'Sync / Performance','count':51},{'module':'Mapping / Field','count':45}],
+    '2026*': [{'module':'Other','count':62},{'module':'Case Management','count':28},{'module':'Survey','count':25},{'module':'Sync / Performance','count':23},{'module':'Mapping / Field','count':15}]
   }
 };
 
@@ -382,13 +382,13 @@ function initModuleWidgets(filteredYears) {
 <!-- Module Breakdown -->
 <div class="charts" id="module-section">
   <div class="chart-card">
-    <h2>Top 5 Modules &mdash; Origin (ORG)</h2>
+    <h2>Top 5 Features &mdash; Origin (ORG)</h2>
     <div class="module-tabs" id="org-tabs"></div>
     <canvas id="chartModuleOrg"></canvas>
     <p class="module-note">Categorised by summary prefix across all environments.</p>
   </div>
   <div class="chart-card">
-    <h2>Top 5 Modules &mdash; Orbit (GMS)</h2>
+    <h2>Top 5 Features &mdash; Orbit (GMS)</h2>
     <div class="module-tabs" id="gms-tabs"></div>
     <canvas id="chartModuleGms"></canvas>
     <p class="module-note">Categorised by summary prefix across all environments.</p>
