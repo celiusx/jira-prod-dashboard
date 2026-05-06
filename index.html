@@ -542,6 +542,25 @@ const DEFAULT_FILTERS = {
 
 let chartInstances = {};
 
+const ALL_STATUS_KEYS = ['testingRequested','testingOngoing','selectedForDev','reviewing','reviewRequested','inProgress','clarificationRequested','closed','candidate','canceled'];
+
+function getScaledRows(rows, f) {
+  return rows.map(r => {
+    const allTotal = ALL_STATUS_KEYS.reduce((s, k) => s + (r[k] || 0), 0);
+    const selTotal = f.statuses.reduce((s, k) => s + (r[k] || 0), 0);
+    const scale    = allTotal > 0 ? selTotal / allTotal : 1;
+    return {
+      ...r,
+      org:     Math.round(r.org     * scale),
+      gms:     Math.round(r.gms     * scale),
+      highest: Math.round(r.highest * scale),
+      high:    Math.round(r.high    * scale),
+      medium:  Math.round(r.medium  * scale),
+      low:     Math.round(r.low     * scale),
+    };
+  });
+}
+
 // ── Filter state ──────────────────────────────────────────────────
 function getFilters() {
   try {
@@ -613,8 +632,9 @@ function onFilterChange() {
 
 // ── KPIs ──────────────────────────────────────────────────────────
 function updateKPIs(rows, f) {
+  const scaled = getScaledRows(rows, f);
   const pct = (n, d) => d > 0 ? Math.round(n / d * 100) + '% of total' : '—';
-  const sum = key => rows.reduce((s, r) => s + r[key], 0);
+  const sum = key => scaled.reduce((s, r) => s + r[key], 0);
 
   const orgTotal = f.projects.includes('org') ? sum('org') : 0;
   const gmsTotal = f.projects.includes('gms') ? sum('gms') : 0;
@@ -636,7 +656,8 @@ function updateKPIs(rows, f) {
   document.getElementById('kpi-highest').textContent     = sum('highest');
   document.getElementById('kpi-highest-sub').textContent = pct(sum('highest'), total);
 
-  document.getElementById('kpi-open').textContent = sum('testingRequested') + sum('testingOngoing') + sum('selectedForDev') + sum('reviewing') + sum('reviewRequested') + sum('inProgress') + sum('clarificationRequested') + sum('candidate');
+  const rawSum = key => rows.reduce((s, r) => s + (r[key] || 0), 0);
+  document.getElementById('kpi-open').textContent = rawSum('testingRequested') + rawSum('testingOngoing') + rawSum('selectedForDev') + rawSum('reviewing') + rawSum('reviewRequested') + rawSum('inProgress') + rawSum('clarificationRequested') + rawSum('candidate');
 }
 
 // ── Charts ────────────────────────────────────────────────────────
@@ -644,13 +665,14 @@ function renderCharts(rows, f) {
   Object.values(chartInstances).forEach(c => { try { c.destroy(); } catch(e) {} });
   chartInstances = {};
 
+  const scaled = getScaledRows(rows, f);
   const labels = rows.map(r => r.year);
   const empty  = [{ label: 'No data', data: labels.map(() => 0) }];
 
   // Chart 1: ORG vs GMS grouped bar
   const ds1 = [];
-  if (f.projects.includes('org')) ds1.push({ label: 'Origin (ORG)', data: rows.map(r => r.org),  backgroundColor: 'rgba(15,52,96,0.85)',  borderRadius: 6 });
-  if (f.projects.includes('gms')) ds1.push({ label: 'Orbit (GMS)',  data: rows.map(r => r.gms),  backgroundColor: 'rgba(230,126,34,0.85)', borderRadius: 6 });
+  if (f.projects.includes('org')) ds1.push({ label: 'Origin (ORG)', data: scaled.map(r => r.org),  backgroundColor: 'rgba(15,52,96,0.85)',  borderRadius: 6 });
+  if (f.projects.includes('gms')) ds1.push({ label: 'Orbit (GMS)',  data: scaled.map(r => r.gms),  backgroundColor: 'rgba(230,126,34,0.85)', borderRadius: 6 });
   chartInstances.c1 = new Chart(document.getElementById('chartYearProject'), {
     type: 'bar',
     data: { labels, datasets: ds1.length ? ds1 : empty },
@@ -672,7 +694,7 @@ function renderCharts(rows, f) {
     { key: 'low',     label: 'Low',     color: '#27ae60' },
   ];
   const ds2 = PRIOS.filter(p => f.priorities.includes(p.key))
-    .map(p => ({ label: p.label, data: rows.map(r => r[p.key]), backgroundColor: p.color, borderRadius: 4 }));
+    .map(p => ({ label: p.label, data: scaled.map(r => r[p.key]), backgroundColor: p.color, borderRadius: 4 }));
   chartInstances.c2 = new Chart(document.getElementById('chartPriority'), {
     type: 'bar',
     data: { labels, datasets: ds2.length ? ds2 : empty },
@@ -711,13 +733,13 @@ function renderCharts(rows, f) {
   // Chart 4: Trend line
   const ds4 = [];
   if (f.projects.includes('org') && f.projects.includes('gms')) {
-    ds4.push({ label: 'Total PROD Bugs', data: rows.map(r => r.org + r.gms), borderColor: '#0f3460', backgroundColor: 'rgba(15,52,96,0.08)', fill: true, tension: 0.35, pointRadius: 6, pointHoverRadius: 8, borderWidth: 2.5 });
+    ds4.push({ label: 'Total PROD Bugs', data: scaled.map(r => r.org + r.gms), borderColor: '#0f3460', backgroundColor: 'rgba(15,52,96,0.08)', fill: true, tension: 0.35, pointRadius: 6, pointHoverRadius: 8, borderWidth: 2.5 });
   }
   if (f.projects.includes('org')) {
-    ds4.push({ label: 'Origin (ORG)', data: rows.map(r => r.org), borderColor: 'rgba(15,52,96,0.6)', backgroundColor: 'transparent', tension: 0.35, pointRadius: 4, borderDash: [5, 4], borderWidth: 1.8 });
+    ds4.push({ label: 'Origin (ORG)', data: scaled.map(r => r.org), borderColor: 'rgba(15,52,96,0.6)', backgroundColor: 'transparent', tension: 0.35, pointRadius: 4, borderDash: [5, 4], borderWidth: 1.8 });
   }
   if (f.projects.includes('gms')) {
-    ds4.push({ label: 'Orbit (GMS)', data: rows.map(r => r.gms), borderColor: 'rgba(230,126,34,0.7)', backgroundColor: 'transparent', tension: 0.35, pointRadius: 4, borderDash: [5, 4], borderWidth: 1.8 });
+    ds4.push({ label: 'Orbit (GMS)', data: scaled.map(r => r.gms), borderColor: 'rgba(230,126,34,0.7)', backgroundColor: 'transparent', tension: 0.35, pointRadius: 4, borderDash: [5, 4], borderWidth: 1.8 });
   }
   chartInstances.c4 = new Chart(document.getElementById('chartTrend'), {
     type: 'line',
