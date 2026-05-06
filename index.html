@@ -546,7 +546,13 @@ let chartInstances = {};
 function getFilters() {
   try {
     const s = localStorage.getItem('dashboardFilters');
-    if (s) return JSON.parse(s);
+    if (s) {
+      const f = JSON.parse(s);
+      if (!f.statuses || !f.statuses.some(k => DEFAULT_FILTERS.statuses.includes(k))) {
+        f.statuses = DEFAULT_FILTERS.statuses.slice();
+      }
+      return f;
+    }
   } catch(e) {}
   return JSON.parse(JSON.stringify(DEFAULT_FILTERS));
 }
@@ -600,11 +606,59 @@ function resetFilters() {
   onFilterChange();
 }
 
+const STATUS_KEY_TO_LABEL = {
+  testingRequested: 'Testing Requested',
+  testingOngoing: 'Testing Ongoing',
+  selectedForDev: 'Selected For Development',
+  reviewing: 'Reviewing',
+  reviewRequested: 'Review Requested',
+  inProgress: 'In Progress',
+  clarificationRequested: 'Clarification Requested',
+  closed: 'Closed',
+  candidate: 'Candidate',
+  canceled: 'Canceled'
+};
+
+function _getYearTickets(project, year) {
+  const y = year.replace('*', '');
+  return ((MODULE_DATA[project] || {})[y] || []).flatMap(m => m.tickets || []);
+}
+
+function applyStatusFilter(rows, f) {
+  if (DEFAULT_FILTERS.statuses.every(s => f.statuses.includes(s))) return rows;
+  const selectedLabels = new Set(f.statuses.map(k => STATUS_KEY_TO_LABEL[k]).filter(Boolean));
+  return rows.map(r => {
+    const orgT = _getYearTickets('ORG', r.year).filter(t => selectedLabels.has(t.status));
+    const gmsT = _getYearTickets('GMS', r.year).filter(t => selectedLabels.has(t.status));
+    const all  = orgT.concat(gmsT);
+    const cnt  = p => all.filter(t => t.priority === p).length;
+    const sCnt = k => all.filter(t => t.status === STATUS_KEY_TO_LABEL[k]).length;
+    return Object.assign({}, r, {
+      org:     orgT.length,
+      gms:     gmsT.length,
+      highest: cnt('Highest'),
+      high:    cnt('High'),
+      medium:  cnt('Medium'),
+      low:     cnt('Low'),
+      testingRequested:       sCnt('testingRequested'),
+      testingOngoing:         sCnt('testingOngoing'),
+      selectedForDev:         sCnt('selectedForDev'),
+      reviewing:              sCnt('reviewing'),
+      reviewRequested:        sCnt('reviewRequested'),
+      inProgress:             sCnt('inProgress'),
+      clarificationRequested: sCnt('clarificationRequested'),
+      closed:                 sCnt('closed'),
+      candidate:              sCnt('candidate'),
+      canceled:               sCnt('canceled'),
+    });
+  });
+}
+
 function onFilterChange() {
   const f = readCheckboxFilters();
   localStorage.setItem('dashboardFilters', JSON.stringify(f));
   updateBadge(f);
-  const rows = DATA.filter(r => f.years.includes(r.year));
+  const rows = applyStatusFilter(DATA.filter(r => f.years.includes(r.year)), f);
   updateKPIs(rows, f);
   renderCharts(rows, f);
   renderTable(rows, f);
@@ -821,7 +875,7 @@ function doLogout() {
 // ── Init ──────────────────────────────────────────────────────────
 const initFilters = getFilters();
 syncCheckboxes(initFilters);
-const initRows = DATA.filter(r => initFilters.years.includes(r.year));
+const initRows = applyStatusFilter(DATA.filter(r => initFilters.years.includes(r.year)), initFilters);
 updateKPIs(initRows, initFilters);
 renderCharts(initRows, initFilters);
 renderTable(initRows, initFilters);
