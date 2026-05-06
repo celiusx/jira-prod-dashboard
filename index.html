@@ -526,11 +526,16 @@ function _renderList(tickets){
 
 <script>
 const DATA = [
-  { year: '2022',  org: 0,   gms: 1,   highest: 0,   high: 0,  medium: 1,   low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0,  reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 0,   candidate: 0,  canceled: 1  },
-  { year: '2023',  org: 11,  gms: 32,  highest: 13,  high: 7,  medium: 23,  low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0,  reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 37,  candidate: 2,  canceled: 4  },
-  { year: '2024',  org: 134, gms: 165, highest: 103, high: 53, medium: 140, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 3,  reviewing: 0, reviewRequested: 0, inProgress: 1, clarificationRequested: 2, closed: 195, candidate: 15, canceled: 83 },
-  { year: '2025',  org: 106, gms: 91,  highest: 53,  high: 31, medium: 110, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 4,  reviewing: 0, reviewRequested: 0, inProgress: 1, clarificationRequested: 4, closed: 142, candidate: 11, canceled: 35 },
-  { year: '2026*', org: 51,  gms: 62,  highest: 42,  high: 28, medium: 43,  low: 0, testingRequested: 6, testingOngoing: 0, selectedForDev: 10, reviewing: 1, reviewRequested: 0, inProgress: 1, clarificationRequested: 5, closed: 66,  candidate: 11, canceled: 13 },
+  { year: '2022',  org: 0,   gms: 1,   highest: 0,   high: 0,  medium: 1,   low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0,  reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 0,   candidate: 0,  canceled: 1,
+    org_closed: 0, gms_closed: 0, org_canceled: 0, gms_canceled: 1, org_candidate: 0, gms_candidate: 0, org_selectedForDev: 0, gms_selectedForDev: 0, org_clarificationRequested: 0, gms_clarificationRequested: 0, org_inProgress: 0, gms_inProgress: 0, org_reviewing: 0, gms_reviewing: 0, org_testingRequested: 0, gms_testingRequested: 0, org_testingOngoing: 0, gms_testingOngoing: 0, org_reviewRequested: 0, gms_reviewRequested: 0 },
+  { year: '2023',  org: 11,  gms: 32,  highest: 13,  high: 7,  medium: 23,  low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0,  reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 37,  candidate: 2,  canceled: 4,
+    org_closed: 9, gms_closed: 28, org_canceled: 1, gms_canceled: 3, org_candidate: 1, gms_candidate: 1, org_selectedForDev: 0, gms_selectedForDev: 0, org_clarificationRequested: 0, gms_clarificationRequested: 0, org_inProgress: 0, gms_inProgress: 0, org_reviewing: 0, gms_reviewing: 0, org_testingRequested: 0, gms_testingRequested: 0, org_testingOngoing: 0, gms_testingOngoing: 0, org_reviewRequested: 0, gms_reviewRequested: 0 },
+  { year: '2024',  org: 134, gms: 165, highest: 103, high: 53, medium: 140, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 3,  reviewing: 0, reviewRequested: 0, inProgress: 1, clarificationRequested: 2, closed: 195, candidate: 15, canceled: 83,
+    org_closed: 79, gms_closed: 116, org_canceled: 43, gms_canceled: 40, org_candidate: 9, gms_candidate: 6, org_selectedForDev: 3, gms_selectedForDev: 0, org_clarificationRequested: 0, gms_clarificationRequested: 2, org_inProgress: 0, gms_inProgress: 1, org_reviewing: 0, gms_reviewing: 0, org_testingRequested: 0, gms_testingRequested: 0, org_testingOngoing: 0, gms_testingOngoing: 0, org_reviewRequested: 0, gms_reviewRequested: 0 },
+  { year: '2025',  org: 106, gms: 91,  highest: 53,  high: 31, medium: 110, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 4,  reviewing: 0, reviewRequested: 0, inProgress: 1, clarificationRequested: 4, closed: 142, candidate: 11, canceled: 35,
+    org_closed: 69, gms_closed: 73, org_canceled: 22, gms_canceled: 13, org_candidate: 10, gms_candidate: 1, org_selectedForDev: 4, gms_selectedForDev: 0, org_clarificationRequested: 1, gms_clarificationRequested: 3, org_inProgress: 0, gms_inProgress: 1, org_reviewing: 0, gms_reviewing: 0, org_testingRequested: 0, gms_testingRequested: 0, org_testingOngoing: 0, gms_testingOngoing: 0, org_reviewRequested: 0, gms_reviewRequested: 0 },
+  { year: '2026*', org: 51,  gms: 62,  highest: 42,  high: 28, medium: 43,  low: 0, testingRequested: 6, testingOngoing: 0, selectedForDev: 10, reviewing: 1, reviewRequested: 0, inProgress: 1, clarificationRequested: 5, closed: 66,  candidate: 11, canceled: 13,
+    org_closed: 31, gms_closed: 35, org_canceled: 5, gms_canceled: 8, org_candidate: 9, gms_candidate: 2, org_selectedForDev: 5, gms_selectedForDev: 5, org_clarificationRequested: 0, gms_clarificationRequested: 5, org_inProgress: 0, gms_inProgress: 1, org_reviewing: 1, gms_reviewing: 0, org_testingRequested: 0, gms_testingRequested: 6, org_testingOngoing: 0, gms_testingOngoing: 0, org_reviewRequested: 0, gms_reviewRequested: 0 },
 ];
 
 const DEFAULT_FILTERS = {
@@ -625,11 +630,11 @@ function _getYearTickets(project, year) {
 }
 
 function getProjectStatusCounts(project, rows) {
+  const prefix = project === 'ORG' ? 'org_' : 'gms_';
   return rows.map(r => {
-    const tickets = _getYearTickets(project, r.year);
     const counts = {};
     Object.keys(STATUS_KEY_TO_LABEL).forEach(k => {
-      counts[k] = tickets.filter(t => t.status === STATUS_KEY_TO_LABEL[k]).length;
+      counts[k] = r[prefix + k] || 0;
     });
     return counts;
   });
@@ -644,6 +649,20 @@ function applyStatusFilter(rows, f) {
     const all  = orgT.concat(gmsT);
     const cnt  = p => all.filter(t => t.priority === p).length;
     const sCnt = k => all.filter(t => t.status === STATUS_KEY_TO_LABEL[k]).length;
+    // per-project fields: use MODULE_DATA tickets if available, else filter DATA fields by selected statuses
+    const hasOrgData = _getYearTickets('ORG', r.year).length > 0;
+    const hasGmsData = _getYearTickets('GMS', r.year).length > 0;
+    const orgCnt = k => hasOrgData
+      ? orgT.filter(t => t.status === STATUS_KEY_TO_LABEL[k]).length
+      : (f.statuses.includes(k) ? (r['org_' + k] || 0) : 0);
+    const gmsCnt = k => hasGmsData
+      ? gmsT.filter(t => t.status === STATUS_KEY_TO_LABEL[k]).length
+      : (f.statuses.includes(k) ? (r['gms_' + k] || 0) : 0);
+    const perProject = {};
+    Object.keys(STATUS_KEY_TO_LABEL).forEach(k => {
+      perProject['org_' + k] = orgCnt(k);
+      perProject['gms_' + k] = gmsCnt(k);
+    });
     return Object.assign({}, r, {
       org:     orgT.length,
       gms:     gmsT.length,
@@ -661,7 +680,7 @@ function applyStatusFilter(rows, f) {
       closed:                 sCnt('closed'),
       candidate:              sCnt('candidate'),
       canceled:               sCnt('canceled'),
-    });
+    }, perProject);
   });
 }
 
