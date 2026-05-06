@@ -786,7 +786,7 @@ function renderCharts(rows, f) {
   const ds3 = [];
   STATS.filter(s => f.statuses.includes(s.key)).forEach(s => {
     if (f.projects.includes('org')) ds3.push({ label: s.label, data: orgCounts3.map(d => d[s.key]), backgroundColor: s.color, stack: 'org', borderRadius: 4 });
-    if (f.projects.includes('gms')) ds3.push({ label: s.label, data: gmsCounts3.map(d => d[s.key]), backgroundColor: s.color, stack: 'gms', borderRadius: 4, hideInLegend: showBoth3 });
+    if (f.projects.includes('gms')) ds3.push({ label: s.label, data: gmsCounts3.map(d => d[s.key]), backgroundColor: s.color, stack: 'gms', borderRadius: 4 });
   });
   chartInstances.c3 = new Chart(document.getElementById('chartStatus'), {
     type: 'bar',
@@ -799,7 +799,7 @@ function renderCharts(rows, f) {
           labels: {
             boxWidth: 12,
             font: { size: 11 },
-            filter: (item, chartData) => !chartData.datasets[item.datasetIndex].hideInLegend
+            filter: (item, chartData) => chartData.datasets.findIndex(d => d.label === item.text) === item.datasetIndex
           }
         },
         tooltip: {
