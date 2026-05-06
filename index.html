@@ -462,7 +462,7 @@ function _renderList(tickets){
     <canvas id="chartYearProject"></canvas>
   </div>
   <div class="chart-card">
-    <h2>Priority Breakdown per Year</h2>
+    <h2>Priority Breakdown per Year &ndash; Origin vs Orbit</h2>
     <canvas id="chartPriority"></canvas>
   </div>
   <div class="chart-card">
@@ -640,6 +640,21 @@ function getProjectStatusCounts(project, rows) {
   });
 }
 
+function getProjectPriorityCounts(project, rows, f) {
+  const allSelected = DEFAULT_FILTERS.statuses.every(s => f.statuses.includes(s));
+  const selectedLabels = allSelected ? null : new Set(f.statuses.map(k => STATUS_KEY_TO_LABEL[k]).filter(Boolean));
+  return rows.map(r => {
+    let tickets = _getYearTickets(project, r.year);
+    if (selectedLabels) tickets = tickets.filter(t => selectedLabels.has(t.status));
+    return {
+      highest: tickets.filter(t => t.priority === 'Highest').length,
+      high:    tickets.filter(t => t.priority === 'High').length,
+      medium:  tickets.filter(t => t.priority === 'Medium').length,
+      low:     tickets.filter(t => t.priority === 'Low').length,
+    };
+  });
+}
+
 function applyStatusFilter(rows, f) {
   if (DEFAULT_FILTERS.statuses.every(s => f.statuses.includes(s))) return rows;
   const selectedLabels = new Set(f.statuses.map(k => STATUS_KEY_TO_LABEL[k]).filter(Boolean));
@@ -748,21 +763,44 @@ function renderCharts(rows, f) {
     }
   });
 
-  // Chart 2: Priority stacked bar
+  // Chart 2: Priority stacked bar – Origin vs Orbit
   const PRIOS = [
     { key: 'highest', label: 'Highest', color: '#e74c3c' },
     { key: 'high',    label: 'High',    color: '#e67e22' },
     { key: 'medium',  label: 'Medium',  color: '#f39c12' },
     { key: 'low',     label: 'Low',     color: '#27ae60' },
   ];
-  const ds2 = PRIOS.filter(p => f.priorities.includes(p.key))
-    .map(p => ({ label: p.label, data: rows.map(r => r[p.key]), backgroundColor: p.color, borderRadius: 4 }));
+  const orgPrios2 = getProjectPriorityCounts('ORG', rows, f);
+  const gmsPrios2 = getProjectPriorityCounts('GMS', rows, f);
+  const ds2 = [];
+  PRIOS.filter(p => f.priorities.includes(p.key)).forEach(p => {
+    if (f.projects.includes('org')) ds2.push({ label: p.label, data: orgPrios2.map(d => d[p.key]), backgroundColor: p.color, stack: 'org', borderRadius: 4 });
+    if (f.projects.includes('gms')) ds2.push({ label: p.label, data: gmsPrios2.map(d => d[p.key]), backgroundColor: p.color, stack: 'gms', borderRadius: 4 });
+  });
   chartInstances.c2 = new Chart(document.getElementById('chartPriority'), {
     type: 'bar',
     data: { labels, datasets: ds2.length ? ds2 : empty },
     options: {
       responsive: true,
-      plugins: { legend: { position: 'top' } },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            boxWidth: 12,
+            font: { size: 11 },
+            filter: (item, chartData) => chartData.datasets.findIndex(d => d.label === item.text) === item.datasetIndex
+          }
+        },
+        tooltip: {
+          callbacks: {
+            title: ctx => {
+              if (!ctx.length) return '';
+              const proj = ctx[0].dataset.stack === 'org' ? 'Origin' : 'Orbit';
+              return proj + ' – ' + ctx[0].label;
+            }
+          }
+        }
+      },
       scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: '#f0f2f5' } } }
     }
   });
