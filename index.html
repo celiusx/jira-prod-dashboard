@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -521,16 +521,16 @@ function _renderList(tickets){
     </thead>
     <tbody id="table-body"></tbody>
   </table>
-  <p class="note">* 2026 is a partial year (data through 5 May 2026).</p>
+  <p class="note">* 2026 is a partial year (data through 7 May 2026).</p>
 </div>
 
 <script>
 const DATA = [
-  { year: '2022',  org: 0,   gms: 1,   highest: 0,   high: 0,  medium: 1,   low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 1,   candidate: 0, canceled: 0 },
-  { year: '2023',  org: 11,  gms: 32,  highest: 13,  high: 7,  medium: 23,  low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 41,  candidate: 2, canceled: 0 },
-  { year: '2024',  org: 134, gms: 165, highest: 103, high: 53, medium: 140, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 2, clarificationRequested: 0, closed: 278, candidate: 0, canceled: 19 },
-  { year: '2025',  org: 106, gms: 92,  highest: 53,  high: 32, medium: 110, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 5, clarificationRequested: 0, closed: 177, candidate: 0, canceled: 16 },
-  { year: '2026*', org: 51,  gms: 61,  highest: 42,  high: 27, medium: 43,  low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 5, clarificationRequested: 0, closed: 77,  candidate: 0, canceled: 30 },
+  { year: '2022',  org: 0,   gms: 1,   highest: 0,   high: 0,  medium: 1,   low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0,  reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 0,   candidate: 0,  canceled: 1  },
+  { year: '2023',  org: 11,  gms: 32,  highest: 13,  high: 7,  medium: 23,  low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0,  reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 37,  candidate: 2,  canceled: 4  },
+  { year: '2024',  org: 134, gms: 165, highest: 103, high: 53, medium: 140, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 3,  reviewing: 0, reviewRequested: 0, inProgress: 1, clarificationRequested: 2, closed: 195, candidate: 15, canceled: 83 },
+  { year: '2025',  org: 106, gms: 91,  highest: 53,  high: 31, medium: 110, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 4,  reviewing: 0, reviewRequested: 0, inProgress: 1, clarificationRequested: 4, closed: 142, candidate: 11, canceled: 35 },
+  { year: '2026*', org: 51,  gms: 62,  highest: 42,  high: 28, medium: 43,  low: 0, testingRequested: 6, testingOngoing: 0, selectedForDev: 10, reviewing: 1, reviewRequested: 0, inProgress: 1, clarificationRequested: 5, closed: 66,  candidate: 11, canceled: 13 },
 ];
 
 const DEFAULT_FILTERS = {
