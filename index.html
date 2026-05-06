@@ -377,9 +377,16 @@ function _renderList(tickets){
         <button class="fp-toggle-all" onclick="toggleAll('statuses')">All / None</button>
       </div>
       <div class="fp-options">
-        <label><input type="checkbox" name="statuses" value="done"       onchange="onFilterChange()"> Done</label>
-        <label><input type="checkbox" name="statuses" value="inProgress" onchange="onFilterChange()"> In Progress</label>
-        <label><input type="checkbox" name="statuses" value="todo"       onchange="onFilterChange()"> Open / To Do</label>
+        <label><input type="checkbox" name="statuses" value="testingRequested"      onchange="onFilterChange()"> Testing Requested</label>
+        <label><input type="checkbox" name="statuses" value="testingOngoing"        onchange="onFilterChange()"> Testing Ongoing</label>
+        <label><input type="checkbox" name="statuses" value="selectedForDev"        onchange="onFilterChange()"> Selected For Development</label>
+        <label><input type="checkbox" name="statuses" value="reviewing"             onchange="onFilterChange()"> Reviewing</label>
+        <label><input type="checkbox" name="statuses" value="reviewRequested"       onchange="onFilterChange()"> Review Requested</label>
+        <label><input type="checkbox" name="statuses" value="inProgress"            onchange="onFilterChange()"> In Progress</label>
+        <label><input type="checkbox" name="statuses" value="clarificationRequested" onchange="onFilterChange()"> Clarification Requested</label>
+        <label><input type="checkbox" name="statuses" value="closed"               onchange="onFilterChange()"> Closed</label>
+        <label><input type="checkbox" name="statuses" value="candidate"            onchange="onFilterChange()"> Candidate</label>
+        <label><input type="checkbox" name="statuses" value="canceled"             onchange="onFilterChange()"> Canceled</label>
       </div>
     </div>
     <hr class="fp-divider"/>
@@ -500,9 +507,16 @@ function _renderList(tickets){
         <th class="col-high">High</th>
         <th class="col-medium">Medium</th>
         <th class="col-low">Low</th>
-        <th class="col-done">Done</th>
+        <th class="col-testing-requested">Testing Requested</th>
+        <th class="col-testing-ongoing">Testing Ongoing</th>
+        <th class="col-selected-for-dev">Selected For Dev</th>
+        <th class="col-reviewing">Reviewing</th>
+        <th class="col-review-requested">Review Requested</th>
         <th class="col-inprogress">In Progress</th>
-        <th class="col-todo">Open / To Do</th>
+        <th class="col-clarification-requested">Clarification Requested</th>
+        <th class="col-closed">Closed</th>
+        <th class="col-candidate">Candidate</th>
+        <th class="col-canceled">Canceled</th>
       </tr>
     </thead>
     <tbody id="table-body"></tbody>
@@ -512,17 +526,17 @@ function _renderList(tickets){
 
 <script>
 const DATA = [
-  { year: '2022',  org: 0,   gms: 1,   highest: 0,   high: 0,  medium: 1,   low: 0, done: 1,   inProgress: 0, todo: 0  },
-  { year: '2023',  org: 11,  gms: 32,  highest: 13,  high: 7,  medium: 23,  low: 0, done: 41,  inProgress: 0, todo: 2  },
-  { year: '2024',  org: 134, gms: 165, highest: 103, high: 53, medium: 140, low: 3, done: 278, inProgress: 2, todo: 19 },
-  { year: '2025',  org: 106, gms: 92,  highest: 53,  high: 32, medium: 110, low: 3, done: 177, inProgress: 5, todo: 16 },
-  { year: '2026*', org: 51,  gms: 61,  highest: 42,  high: 27, medium: 43,  low: 0, done: 77,  inProgress: 5, todo: 30 },
+  { year: '2022',  org: 0,   gms: 1,   highest: 0,   high: 0,  medium: 1,   low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 1,   candidate: 0, canceled: 0 },
+  { year: '2023',  org: 11,  gms: 32,  highest: 13,  high: 7,  medium: 23,  low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 0, clarificationRequested: 0, closed: 41,  candidate: 2, canceled: 0 },
+  { year: '2024',  org: 134, gms: 165, highest: 103, high: 53, medium: 140, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 2, clarificationRequested: 0, closed: 278, candidate: 0, canceled: 19 },
+  { year: '2025',  org: 106, gms: 92,  highest: 53,  high: 32, medium: 110, low: 3, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 5, clarificationRequested: 0, closed: 177, candidate: 0, canceled: 16 },
+  { year: '2026*', org: 51,  gms: 61,  highest: 42,  high: 27, medium: 43,  low: 0, testingRequested: 0, testingOngoing: 0, selectedForDev: 0, reviewing: 0, reviewRequested: 0, inProgress: 5, clarificationRequested: 0, closed: 77,  candidate: 0, canceled: 30 },
 ];
 
 const DEFAULT_FILTERS = {
   years:      ['2022', '2023', '2024', '2025', '2026*'],
   projects:   ['org', 'gms'],
-  statuses:   ['done', 'inProgress', 'todo'],
+  statuses:   ['testingRequested', 'testingOngoing', 'selectedForDev', 'reviewing', 'reviewRequested', 'inProgress', 'clarificationRequested', 'closed', 'candidate', 'canceled'],
   priorities: ['highest', 'high', 'medium', 'low']
 };
 
@@ -622,7 +636,7 @@ function updateKPIs(rows, f) {
   document.getElementById('kpi-highest').textContent     = sum('highest');
   document.getElementById('kpi-highest-sub').textContent = pct(sum('highest'), total);
 
-  document.getElementById('kpi-open').textContent = sum('inProgress') + sum('todo');
+  document.getElementById('kpi-open').textContent = sum('testingRequested') + sum('testingOngoing') + sum('selectedForDev') + sum('reviewing') + sum('reviewRequested') + sum('inProgress') + sum('clarificationRequested') + sum('candidate');
 }
 
 // ── Charts ────────────────────────────────────────────────────────
@@ -671,9 +685,16 @@ function renderCharts(rows, f) {
 
   // Chart 3: Status stacked bar
   const STATS = [
-    { key: 'done',       label: 'Done',         color: '#27ae60' },
-    { key: 'inProgress', label: 'In Progress',  color: '#2980b9' },
-    { key: 'todo',       label: 'Open / To Do', color: '#e67e22' },
+    { key: 'testingRequested',       label: 'Testing Requested',       color: '#8e44ad' },
+    { key: 'testingOngoing',         label: 'Testing Ongoing',         color: '#9b59b6' },
+    { key: 'selectedForDev',         label: 'Selected For Development', color: '#2980b9' },
+    { key: 'reviewing',              label: 'Reviewing',               color: '#1abc9c' },
+    { key: 'reviewRequested',        label: 'Review Requested',        color: '#16a085' },
+    { key: 'inProgress',             label: 'In Progress',             color: '#3498db' },
+    { key: 'clarificationRequested', label: 'Clarification Requested', color: '#e67e22' },
+    { key: 'closed',                 label: 'Closed',                  color: '#27ae60' },
+    { key: 'candidate',              label: 'Candidate',               color: '#95a5a6' },
+    { key: 'canceled',               label: 'Canceled',                color: '#e74c3c' },
   ];
   const ds3 = STATS.filter(s => f.statuses.includes(s.key))
     .map(s => ({ label: s.label, data: rows.map(r => r[s.key]), backgroundColor: s.color, borderRadius: 4 }));
@@ -724,9 +745,16 @@ function renderTable(rows, f) {
   show('.col-high',       f.priorities.includes('high'));
   show('.col-medium',     f.priorities.includes('medium'));
   show('.col-low',        f.priorities.includes('low'));
-  show('.col-done',       f.statuses.includes('done'));
-  show('.col-inprogress', f.statuses.includes('inProgress'));
-  show('.col-todo',       f.statuses.includes('todo'));
+  show('.col-testing-requested',       f.statuses.includes('testingRequested'));
+  show('.col-testing-ongoing',         f.statuses.includes('testingOngoing'));
+  show('.col-selected-for-dev',        f.statuses.includes('selectedForDev'));
+  show('.col-reviewing',               f.statuses.includes('reviewing'));
+  show('.col-review-requested',        f.statuses.includes('reviewRequested'));
+  show('.col-inprogress',              f.statuses.includes('inProgress'));
+  show('.col-clarification-requested', f.statuses.includes('clarificationRequested'));
+  show('.col-closed',                  f.statuses.includes('closed'));
+  show('.col-candidate',               f.statuses.includes('candidate'));
+  show('.col-canceled',                f.statuses.includes('canceled'));
 
   const b = (v, cls) => `<span class="badge ${cls}">${v}</span>`;
   const showOrg = f.projects.includes('org');
@@ -743,9 +771,16 @@ function renderTable(rows, f) {
       <td class="col-high">${r.high}</td>
       <td class="col-medium">${r.medium}</td>
       <td class="col-low">${r.low}</td>
-      <td class="col-done">${b(r.done, 'badge-done')}</td>
+      <td class="col-testing-requested">${r.testingRequested}</td>
+      <td class="col-testing-ongoing">${r.testingOngoing}</td>
+      <td class="col-selected-for-dev">${r.selectedForDev}</td>
+      <td class="col-reviewing">${r.reviewing}</td>
+      <td class="col-review-requested">${r.reviewRequested}</td>
       <td class="col-inprogress">${b(r.inProgress, 'badge-progress')}</td>
-      <td class="col-todo">${b(r.todo, 'badge-todo')}</td>
+      <td class="col-clarification-requested">${r.clarificationRequested}</td>
+      <td class="col-closed">${b(r.closed, 'badge-done')}</td>
+      <td class="col-candidate">${r.candidate}</td>
+      <td class="col-canceled">${r.canceled}</td>
     </tr>`;
   }).join('');
 
@@ -761,9 +796,16 @@ function renderTable(rows, f) {
     <td class="col-high">${sum('high')}</td>
     <td class="col-medium">${sum('medium')}</td>
     <td class="col-low">${sum('low')}</td>
-    <td class="col-done">${sum('done')}</td>
+    <td class="col-testing-requested">${sum('testingRequested')}</td>
+    <td class="col-testing-ongoing">${sum('testingOngoing')}</td>
+    <td class="col-selected-for-dev">${sum('selectedForDev')}</td>
+    <td class="col-reviewing">${sum('reviewing')}</td>
+    <td class="col-review-requested">${sum('reviewRequested')}</td>
     <td class="col-inprogress">${sum('inProgress')}</td>
-    <td class="col-todo">${sum('todo')}</td>
+    <td class="col-clarification-requested">${sum('clarificationRequested')}</td>
+    <td class="col-closed">${sum('closed')}</td>
+    <td class="col-candidate">${sum('candidate')}</td>
+    <td class="col-canceled">${sum('canceled')}</td>
   </tr>`;
 
   document.getElementById('table-body').innerHTML = html;
