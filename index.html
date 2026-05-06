@@ -782,10 +782,11 @@ function renderCharts(rows, f) {
   ];
   const orgCounts3 = getProjectStatusCounts('ORG', rows);
   const gmsCounts3 = getProjectStatusCounts('GMS', rows);
+  const showBoth3 = f.projects.includes('org') && f.projects.includes('gms');
   const ds3 = [];
   STATS.filter(s => f.statuses.includes(s.key)).forEach(s => {
-    if (f.projects.includes('org')) ds3.push({ label: 'Origin – ' + s.label, data: orgCounts3.map(d => d[s.key]), backgroundColor: s.color, stack: 'org', borderRadius: 4 });
-    if (f.projects.includes('gms')) ds3.push({ label: 'Orbit – '  + s.label, data: gmsCounts3.map(d => d[s.key]), backgroundColor: s.color + 'B3', stack: 'gms', borderRadius: 4 });
+    if (f.projects.includes('org')) ds3.push({ label: s.label, data: orgCounts3.map(d => d[s.key]), backgroundColor: s.color, stack: 'org', borderRadius: 4 });
+    if (f.projects.includes('gms')) ds3.push({ label: s.label, data: gmsCounts3.map(d => d[s.key]), backgroundColor: s.color, stack: 'gms', borderRadius: 4, hideInLegend: showBoth3 });
   });
   chartInstances.c3 = new Chart(document.getElementById('chartStatus'), {
     type: 'bar',
@@ -795,7 +796,20 @@ function renderCharts(rows, f) {
       plugins: {
         legend: {
           position: 'top',
-          labels: { boxWidth: 12, font: { size: 11 } }
+          labels: {
+            boxWidth: 12,
+            font: { size: 11 },
+            filter: (item, chartData) => !chartData.datasets[item.datasetIndex].hideInLegend
+          }
+        },
+        tooltip: {
+          callbacks: {
+            title: ctx => {
+              if (!ctx.length) return '';
+              const proj = ctx[0].dataset.stack === 'org' ? 'Origin' : 'Orbit';
+              return proj + ' – ' + ctx[0].label;
+            }
+          }
         }
       },
       scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: '#f0f2f5' } } }
