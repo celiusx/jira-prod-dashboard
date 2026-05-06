@@ -466,7 +466,7 @@ function _renderList(tickets){
     <canvas id="chartPriority"></canvas>
   </div>
   <div class="chart-card">
-    <h2>Resolution Status per Year</h2>
+    <h2>Resolution Status per Year &ndash; Origin vs Orbit</h2>
     <canvas id="chartStatus"></canvas>
   </div>
   <div class="chart-card full">
@@ -624,6 +624,17 @@ function _getYearTickets(project, year) {
   return ((MODULE_DATA[project] || {})[y] || []).flatMap(m => m.tickets || []);
 }
 
+function getProjectStatusCounts(project, rows) {
+  return rows.map(r => {
+    const tickets = _getYearTickets(project, r.year);
+    const counts = {};
+    Object.keys(STATUS_KEY_TO_LABEL).forEach(k => {
+      counts[k] = tickets.filter(t => t.status === STATUS_KEY_TO_LABEL[k]).length;
+    });
+    return counts;
+  });
+}
+
 function applyStatusFilter(rows, f) {
   if (DEFAULT_FILTERS.statuses.every(s => f.statuses.includes(s))) return rows;
   const selectedLabels = new Set(f.statuses.map(k => STATUS_KEY_TO_LABEL[k]).filter(Boolean));
@@ -750,14 +761,24 @@ function renderCharts(rows, f) {
     { key: 'candidate',              label: 'Candidate',               color: '#95a5a6' },
     { key: 'canceled',               label: 'Canceled',                color: '#e74c3c' },
   ];
-  const ds3 = STATS.filter(s => f.statuses.includes(s.key))
-    .map(s => ({ label: s.label, data: rows.map(r => r[s.key]), backgroundColor: s.color, borderRadius: 4 }));
+  const orgCounts3 = getProjectStatusCounts('ORG', rows);
+  const gmsCounts3 = getProjectStatusCounts('GMS', rows);
+  const ds3 = [];
+  STATS.filter(s => f.statuses.includes(s.key)).forEach(s => {
+    if (f.projects.includes('org')) ds3.push({ label: 'Origin – ' + s.label, data: orgCounts3.map(d => d[s.key]), backgroundColor: s.color, stack: 'org', borderRadius: 4 });
+    if (f.projects.includes('gms')) ds3.push({ label: 'Orbit – '  + s.label, data: gmsCounts3.map(d => d[s.key]), backgroundColor: s.color + 'B3', stack: 'gms', borderRadius: 4 });
+  });
   chartInstances.c3 = new Chart(document.getElementById('chartStatus'), {
     type: 'bar',
     data: { labels, datasets: ds3.length ? ds3 : empty },
     options: {
       responsive: true,
-      plugins: { legend: { position: 'top' } },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { boxWidth: 12, font: { size: 11 } }
+        }
+      },
       scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, grid: { color: '#f0f2f5' } } }
     }
   });
